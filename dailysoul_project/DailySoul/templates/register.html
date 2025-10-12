@@ -1,0 +1,84 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DailySoul — Register</title>
+
+  <link href="{% static 'css/auth.css' %}" rel="stylesheet">
+</head>
+<body>
+  <div class="wrap">
+    <aside class="hero">
+      <div class="inner">
+        <img src="{% static 'images/cartoon.png' %}" alt="DailySoul cartoon" class="hero-img">
+        <h1>🌿 DailySoul</h1>
+        <p>DailySoul helps you cultivate mindfulness through gentle daily rituals. Create an account to begin.</p>
+      </div>
+    </aside>
+
+
+    <section class="card">
+      <h2>Create account</h2>
+      <div class="muted">Simple & private — we only ask what we need.</div>
+
+      <form method="POST" novalidate>
+        {% csrf_token %}
+
+        {% if messages %}
+          {% for m in messages %}
+            <div class="field-error">{{ m }}</div>
+          {% endfor %}
+        {% endif %}
+
+        <!-- Username -->
+        <div>
+          <label for="id_username">Username</label>
+          <input id="id_username" class="input" type="text" name="username" placeholder="Choose a username" required autocomplete="username">
+        </div>
+
+        <!-- Email -->
+        <div>
+          <label for="id_email">Email (optional)</label>
+          <input id="id_email" class="input" type="email" name="email" placeholder="you@example.com" autocomplete="email">
+        </div>
+
+        <!-- Password -->
+        <div>
+          <label for="id_password1">Password</label>
+          <div class="pw-row">
+            <input id="id_password1" class="input" type="password" name="password1" placeholder="Create a password" required autocomplete="new-password">
+            <button type="button" class="pw-toggle" aria-label="Show password">👁️</button>
+          </div>
+        </div>
+
+        <!-- Confirm -->
+        <div>
+          <label for="id_password2">Confirm password</label>
+          <div class="pw-row">
+            <input id="id_password2" class="input" type="password" name="password2" placeholder="Confirm your password" required autocomplete="new-password">
+            <button type="button" class="pw-toggle" aria-label="Show password">👁️</button>
+          </div>
+        </div>
+
+        <button type="submit" class="submit-btn">Create account</button>
+
+        <div class="meta">Already have an account? <a href="{% url 'login' %}">Sign in</a></div>
+      </form>
+    </section>
+  </div>
+
+<script>
+  // password show/hide
+  document.querySelectorAll('.pw-toggle').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      const row = btn.closest('.pw-row');
+      const input = row.querySelector('input');
+      input.type = input.type === 'password' ? 'text' : 'password';
+      btn.textContent = input.type === 'password' ? '👁️' : '🙈';
+    });
+  });
+</script>
+</body>
+</html>

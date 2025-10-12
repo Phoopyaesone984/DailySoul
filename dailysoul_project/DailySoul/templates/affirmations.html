@@ -1,10 +1,78 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <title>DailySoul | Affirmations</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Poppins', sans-serif;
+            text-align: center;
+            padding: 40px;
+        }
+        h1 { color: #77bfa3; }
+        #card {
+            display: none;
+            background: white;
+            width: 350px;
+            margin: 30px auto;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            transition: transform 0.5s;
+        }
+        #card.show {
+            display: block;
+            transform: rotateY(360deg);
+        }
+        #card img {
+            width: 100%;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+        #category {
+            font-size: 0.9rem;
+            color: gray;
+        }
+        button {
+            background-color: #77bfa3;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover { background-color: #5fa88d; }
+    </style>
 </head>
 <body>
-$END$
+    <h1>🌿 Your DailySoul Affirmation 🌿</h1>
+    <p>Take a deep breath and draw your affirmation card</p>
+
+    <button id="drawBtn">🎴 Draw a Card</button>
+
+    <div id="card">
+        <img id="affirmationImg" src="" alt="" style="display:none;">
+        <h3 id="affirmationText"></h3>
+        <p id="category"></p>
+    </div>
+
+    <script>
+        $(document).ready(function(){
+            $('#drawBtn').click(function(){
+                $.get("/draw/", function(data){
+                    $("#affirmationText").text(data.affirmation);
+                    if (data.image) {
+                        $("#affirmationImg").attr("src", data.image).show();
+                    } else {
+                        $("#affirmationImg").hide();
+                    }
+                    $("#category").text(data.category.replace('-', ' '));
+                    $("#card").addClass("show");
+                });
+            });
+        });
+    </script>
 </body>
 </html>

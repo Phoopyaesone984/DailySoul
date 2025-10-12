@@ -1,0 +1,107 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DailySoul — Login</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    /* reuse same small style as register for convenience */
+    :root{
+      --bg1:#e8f5e9;
+      --bg2:#fff3e0;
+      --accent:#77bfa3;
+      --accent-dark:#5fa88d;
+      --muted:#555;
+      --card-bg:#ffffff;
+      --radius:22px;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    html,body{height:100%;}
+    body{
+      font-family:'Poppins',sans-serif;
+      background:linear-gradient(135deg,var(--bg1),var(--bg2));
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:40px 16px;
+      min-height:100vh;
+      color:#222;
+    }
+    .wrap{ width:100%; max-width:980px; display:grid; grid-template-columns:1fr 540px; gap:32px; align-items:center; }
+    .hero{ background: linear-gradient(135deg, rgba(88,180,106,0.08), rgba(46,125,50,0.02)); border-radius:var(--radius); padding:34px; box-shadow:0 12px 40px rgba(0,0,0,0.06); min-height:360px; display:flex; align-items:center; justify-content:center; }
+    .hero .inner{ text-align:center; }
+    .hero h1{ color:var(--accent); font-size:2rem; margin-bottom:12px; }
+    .card{ background:var(--card-bg); border-radius:18px; padding:28px; box-shadow:0 10px 30px rgba(0,0,0,0.08); }
+    .card h2{ color:#1f4d2f; margin-bottom:6px; }
+    .muted{ color:var(--muted); font-size:0.95rem; margin-bottom:14px; }
+    form{ display:flex; flex-direction:column; gap:12px; }
+    label{ font-weight:600; color:#204a30; font-size:0.9rem; }
+    .input{ width:100%; padding:12px 14px; border-radius:10px; border:1px solid #e6efe6; font-size:1rem; }
+    .input:focus{ box-shadow:0 8px 20px rgba(34,77,47,0.06); border-color:var(--accent); }
+    .pw-row{ display:flex; gap:8px; align-items:center; }
+    .pw-toggle{ background:transparent; border:1px solid #eef6ee; padding:8px 10px; border-radius:10px; cursor:pointer; }
+    .submit-btn{ border:none; background:linear-gradient(90deg,var(--accent), #6fc17e); color:#fff; padding:12px; border-radius:12px; font-weight:600; cursor:pointer; }
+    .meta{ text-align:center; color:var(--muted); margin-top:8px; }
+    .meta a{ color:var(--accent-dark); font-weight:600; text-decoration:none; }
+    @media (max-width:900px){ .wrap{ grid-template-columns:1fr; } .hero{ order:2 } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <aside class="hero">
+      <div class="inner">
+        <h1>🌿 DailySoul</h1>
+        <p>Welcome back — keep your streaks gentle and steady.</p>
+      </div>
+    </aside>
+
+    <section class="card">
+      <h2>Sign in</h2>
+      <div class="muted">Good to see you again</div>
+
+      <form method="POST" novalidate>
+        {% csrf_token %}
+
+        {% if messages %}
+          {% for m in messages %}
+            <div style="color:#b00020; font-size:0.95rem; margin-bottom:8px;">{{ m }}</div>
+          {% endfor %}
+        {% endif %}
+
+        <div>
+          <label for="id_username">Username</label>
+          <input id="id_username" class="input" type="text" name="username" placeholder="Username" required autocomplete="username">
+        </div>
+
+        <div>
+          <label for="id_password">Password</label>
+          <div class="pw-row">
+            <input id="id_password" class="input" type="password" name="password" placeholder="Password" required autocomplete="current-password">
+            <button type="button" class="pw-toggle" aria-label="Show password">👁️</button>
+          </div>
+        </div>
+
+        <button type="submit" class="submit-btn">Sign in</button>
+
+        <div class="meta">New here? <a href="{% url 'register' %}">Create account</a></div>
+      </form>
+    </section>
+  </div>
+
+<script>
+  document.querySelectorAll('.pw-toggle').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      const row = btn.closest('.pw-row');
+      if (!row) return;
+      const input = row.querySelector('input');
+      if (!input) return;
+      input.type = input.type === 'password' ? 'text' : 'password';
+      btn.textContent = input.type === 'password' ? '👁️' : '🙈';
+    });
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,85 @@
+/* 🌿 DailySoul — Calm and Minimal Design */
+
+body {
+  font-family: 'Poppins', sans-serif;
+  background-color: #fdfdfd; /* plain background */
+  margin: 0;
+  padding: 0;
+  color: #333;
+}
+
+header {
+  background-color: #e8f5e9;
+  padding: 20px;
+  text-align: center;
+  border-bottom: 2px solid #c8e6c9;
+}
+
+header h1 {
+  font-size: 2rem;
+  color: #2e7d32;
+  letter-spacing: 1px;
+}
+
+.container {
+  max-width: 400px;
+  margin: 60px auto;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  padding: 30px;
+}
+
+h2 {
+  text-align: center;
+  color: #388e3c;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+textarea {
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: 1px solid #cfd8dc;
+  font-size: 1rem;
+  width: 100%;
+}
+
+button {
+  background-color: #81c784;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 10px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+button:hover {
+  background-color: #66bb6a;
+}
+
+a {
+  color: #388e3c;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Footer */
+footer {
+  text-align: center;
+  padding: 20px;
+  color: #757575;
+  font-size: 0.9rem;
+}
