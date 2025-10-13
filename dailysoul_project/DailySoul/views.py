@@ -1,6 +1,6 @@
 from django.shortcuts import render,redirect
 from django.http import JsonResponse
-from .models import Affirmation
+from .models import Affirmation,LuckCard
 import random
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import UserCreationForm
@@ -48,13 +48,13 @@ def login_view(request):
         else:
             messages.error(request, "Invalid username or password.")
 
-    return render(request, 'login.html')
+    return render(request, 'dashboard.html')
 
 
 def logout_view(request):
     logout(request)
     messages.info(request, "You have been logged out 🌸")
-    return redirect('login')
+    return redirect('home')
 
 def affirmations_page(request):
     return render(request, 'affirmations.html')
@@ -72,3 +72,11 @@ def draw_affirmation(request):
         'image': card.image.url if card.image else '',
         'category': card.category
     })
+
+
+def dashboard(request):
+    # Pick one random luck card
+    luck_card = random.choice(LuckCard.objects.all()) if LuckCard.objects.exists() else None
+    # Pick five random affirmations
+    affirmations = random.sample(list(Affirmation.objects.all()), min(5, Affirmation.objects.count()))
+    return render(request, 'dashboard.html', {'luck_card': luck_card, 'affirmations': affirmations})

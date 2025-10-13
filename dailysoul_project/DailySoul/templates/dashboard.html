@@ -1,4 +1,12 @@
- :root{
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DailySoul Dashboard</title>
+  <style>
+     :root{
       --bg1:#e8f5e9;
       --bg2:#fff3e0;
       --accent:#77bfa3;
@@ -224,3 +232,50 @@
     flex-direction: column;
   }
 }
+</style>
+</head>
+<body>
+
+  <!-- 🌿 Navbar -->
+  <nav class="navbar">
+    <div class="nav-left">
+      <h2 class="logo">DailySoul</h2>
+    </div>
+    <div class="nav-links">
+      <a href="/dashboard/">Home</a>
+      <a href="/journal/">Journal</a>
+      <a href="/deathnote/">DeathNote</a>
+      <a href="/logout/">Logout</a>
+    </div>
+  </nav>
+
+  <!-- 🌼 Main Layout -->
+  <div class="dashboard-container">
+
+    <!-- Left: Luck Card -->
+    <div class="luck-section">
+      <h3>✨ Today’s Luck Card</h3>
+      {% if luck_card %}
+        <div class="luck-card">
+          <p>{{ luck_card.text }}</p>
+        </div>
+      {% else %}
+        <p>No luck cards available.</p>
+      {% endif %}
+    </div>
+
+    <!-- Right: Affirmations -->
+    <div class="affirmation-section">
+      <h3>🌿 Today’s Affirmations</h3>
+      <ul class="affirmation-list">
+        {% for a in affirmations %}
+          <li>{{ a.text }}</li>
+        {% empty %}
+          <li>No affirmations available yet.</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+</body>
+</html>
