@@ -110,14 +110,9 @@ from django.views.decorators.http import require_GET
 from django.contrib.auth.decorators import login_required
 from .models import LuckCard
 import random
-
 @login_required
 @require_GET
 def draw_luck_api(request):
-    """
-    Return one random LuckCard from the pool (admin-managed).
-    This does NOT persist anything per-user — it's just a fresh draw.
-    """
     qs = LuckCard.objects.all()
     if not qs.exists():
         return JsonResponse({'error': 'No luck cards available.'}, status=404)
@@ -125,5 +120,5 @@ def draw_luck_api(request):
     card = random.choice(list(qs))
     return JsonResponse({
         'message': card.message,
-        'icon': card.icon or '',
+        'image': card.image.url if card.image else ''  # Add this line
     })

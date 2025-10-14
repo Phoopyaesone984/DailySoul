@@ -138,7 +138,7 @@
       transform: none;
     }
 
-    /* Improved Tarot Card Design - Smaller & Softer */
+    /* Improved Tarot Card Design - Same Size */
     .luck-card-wrap {
       display: flex;
       justify-content: center;
@@ -147,8 +147,8 @@
     }
 
     .card-scene {
-      width: 220px; /* Smaller card */
-      height: 300px;
+      width: 260px;
+      height: 340px;
       position: relative;
     }
 
@@ -168,7 +168,6 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 20px;
       box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
       background: #fff;
       text-align: center;
@@ -182,68 +181,48 @@
       font-weight: 700;
       display: flex;
       flex-direction: column;
+      justify-content: center;
+      align-items: center;
       gap: 12px;
+      padding: 20px;
     }
 
     .back-graphic {
-      width: 80px;
-      height: 80px;
+      width: 100px;
+      height: 100px;
       border-radius: 50%;
       background: radial-gradient(circle at 30% 30%, rgba(119, 191, 163, 0.3), rgba(95, 168, 141, 0.1));
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 1.8rem;
-    }
-
-    /* Card Front - Tarot Style */
-    .card-front {
-      transform: rotateY(180deg);
-      border: 2px solid var(--accent);
-      background: linear-gradient(180deg, #ffffff, #f8fffa);
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      padding: 20px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    /* Adding a subtle tarot pattern to the card */
-    .card-front::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-image:
-        radial-gradient(circle at 25% 25%, rgba(119, 191, 163, 0.05) 2px, transparent 2px),
-        radial-gradient(circle at 75% 75%, rgba(119, 191, 163, 0.05) 2px, transparent 2px);
-      background-size: 30px 30px;
-      z-index: 0;
-    }
-
-    .card-front > * {
-      position: relative;
-      z-index: 1;
-    }
-
-    .card-front .icon {
-      font-size: 2.2rem;
       margin-bottom: 8px;
     }
 
+    /* Card Front - Now matches back card design exactly */
+    .card-front {
+      transform: rotateY(180deg);
+      border: 2px solid var(--accent);
+      background: linear-gradient(135deg, rgba(119, 191, 163, 0.08), rgba(95, 168, 141, 0.04));
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      padding: 20px;
+    }
+
     .card-front .message {
-      font-size: 1.05rem;
+      font-size: 1.15rem;
       color: #264d32;
-      line-height: 1.4;
+      line-height: 1.5;
+      font-weight: 500;
+      margin-bottom: 8px;
     }
 
     .card-front .meta {
       font-size: 0.85rem;
       color: var(--muted);
-      margin-top: 8px;
     }
 
     .card-inner.flipped {
@@ -370,8 +349,8 @@
       }
 
       .card-scene {
-        width: 200px;
-        height: 280px;
+        width: 240px;
+        height: 320px;
       }
     }
 
@@ -384,6 +363,11 @@
 
       .small-btn {
         justify-content: center;
+      }
+
+      .card-scene {
+        width: 220px;
+        height: 300px;
       }
     }
   </style>
@@ -434,10 +418,9 @@
               </div>
             </div>
 
-            <!-- Card Front -->
+            <!-- Card Front - Now matches back card design exactly -->
             <div class="card-face card-front" id="cardFront">
               <div>
-                <div class="icon" id="frontIcon" style="display: none;">🔮</div>
                 <div class="message" id="frontMessage">Your luck will appear here</div>
                 <div class="meta" id="frontMeta">Freshly drawn for you</div>
               </div>
@@ -466,7 +449,6 @@
         {% else %}
           <li class="aff-card">
             <div class="aff-text">Loading your daily affirmations…</div>
-            <div class="aff-cat">patience</div>
           </li>
         {% endif %}
       </ul>
@@ -478,7 +460,6 @@
       const drawBtn = document.getElementById('drawLuckBtn');
       const cardInner = document.getElementById('cardInner');
       const frontMessage = document.getElementById('frontMessage');
-      const frontIcon = document.getElementById('frontIcon');
       const confettiArea = document.getElementById('confettiArea');
 
       // Confetti function
@@ -533,8 +514,6 @@
           const data = await res.json();
 
           // Update card content
-          frontIcon.textContent = data.icon || '✨';
-          frontIcon.style.display = 'block';
           frontMessage.textContent = data.message || 'Good things are coming your way!';
 
           // Trigger flip animation
@@ -546,7 +525,6 @@
         } catch (error) {
           console.error('Error drawing luck:', error);
           frontMessage.textContent = error.message;
-          frontIcon.style.display = 'none';
         } finally {
           drawBtn.disabled = false;
           drawBtn.innerHTML = '<span>🔄 Draw</span>';
@@ -581,7 +559,6 @@
           const html = affirmations.map(a => `
             <li class="aff-card">
               <div class="aff-text">${a.text}</div>
-              <div class="aff-cat">${(a.category || 'general').replace('-', ' ')}</div>
             </li>
           `).join('');
 

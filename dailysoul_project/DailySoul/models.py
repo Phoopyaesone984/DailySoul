@@ -51,8 +51,8 @@ class DailyAffirmation(models.Model):
         return f"{self.user.username} - {self.date.isoformat()}"
 
 class LuckCard(models.Model):
-    message= models.CharField(max_length=200)
-    icon=models.CharField(max_length=10, blank=True, null=True)
+    message = models.CharField(max_length=200)
+    image = models.ImageField(upload_to='luck_cards/', blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
