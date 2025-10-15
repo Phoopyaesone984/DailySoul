@@ -6,6 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>DailySoul Dashboard</title>
 
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
   <style>
     :root {
       --bg1: #e8f5e9;
@@ -18,19 +20,13 @@
       --card-bg: #ffffff;
       --radius: 16px;
       --radius-lg: 20px;
+      --tarot-width: 280px;
+      --tarot-height: 480px;
+      --max-container-width: 1400px;
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    html, body {
-      height: 100%;
-      font-family: 'Poppins', sans-serif;
-    }
-
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; font-family: 'Poppins', sans-serif; }
     body {
       background: linear-gradient(135deg, var(--bg1), var(--bg2));
       display: flex;
@@ -42,7 +38,7 @@
       line-height: 1.6;
     }
 
-    /* Navbar - keeping your original style with slight improvements */
+    /* Navbar */
     .navbar {
       width: 100%;
       display: flex;
@@ -53,338 +49,209 @@
       border-radius: var(--radius);
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
       margin-bottom: 32px;
-      max-width: 1100px;
+      max-width: var(--max-container-width);
     }
+    .navbar .logo { color: var(--accent); font-weight: 600; font-size: 1.4rem; }
+    .navbar .nav-links a { text-decoration:none; color:var(--muted); margin-left:20px; font-weight:500; transition:color .25s; }
+    .navbar .nav-links a:hover { color:var(--accent-dark); }
 
-    .navbar .logo {
-      color: var(--accent);
-      font-weight: 600;
-      font-size: 1.4rem;
-    }
-
-    .navbar .nav-links a {
-      text-decoration: none;
-      color: var(--muted);
-      margin-left: 20px;
-      font-weight: 500;
-      transition: color 0.3s ease;
-    }
-
-    .navbar .nav-links a:hover {
-      color: var(--accent-dark);
-    }
-
-    /* Dashboard Layout */
+    /* Layout */
     .dashboard-container {
       display: flex;
       justify-content: space-between;
-      gap: 28px;
-      max-width: 1100px;
+      gap: 35px;
+      max-width: var(--max-container-width);
       width: 100%;
     }
 
-    /* Cards */
-    .luck-section, .affirmation-section {
+    /* Pile section */
+    .pile-section {
       background: var(--card-bg);
       border-radius: var(--radius-lg);
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-      padding: 24px;
-      flex: 1;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+      padding: 30px;
+      flex: 2;
+      transition: transform .3s, box-shadow .3s;
     }
+    .pile-section:hover { transform: translateY(-4px); box-shadow: 0 15px 35px rgba(0,0,0,0.1); }
+    .section-head { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:25px; }
+    .section-head h3 { margin:0; color:var(--accent); font-size:1.4rem; }
 
-    .luck-section:hover, .affirmation-section:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-    }
-
-    .section-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 20px;
-    }
-
-    .section-head h3 {
-      margin: 0;
-      color: var(--accent);
-      font-size: 1.2rem;
-    }
-
-    .small-btn {
+    .draw-btn {
       background: var(--accent);
       color: #fff;
-      border: none;
-      padding: 10px 16px;
-      border-radius: 12px;
-      cursor: pointer;
-      font-weight: 600;
-      font-size: 0.9rem;
-      transition: all 0.3s ease;
-      display: flex;
-      align-items: center;
-      gap: 6px;
+      border:none;
+      padding: 12px 24px;
+      border-radius:12px;
+      cursor:pointer;
+      font-weight:600;
+      font-size:1rem;
     }
+    .draw-btn:hover:not(:disabled) { background:var(--accent-dark); transform:translateY(-2px); box-shadow:0 6px 15px rgba(119,191,163,0.4); }
+    .draw-btn:disabled { opacity:.6; cursor:not-allowed; transform:none; }
 
-    .small-btn:hover:not(:disabled) {
-      background: var(--accent-dark);
-      transform: translateY(-1px);
+    .pile-cards-container { display:flex; justify-content:space-around; gap:30px; margin-bottom:24px; }
+
+    /* IMPORTANT: precise flip behavior and stacking fix */
+    .pile-card { width:var(--tarot-width); height:var(--tarot-height); perspective:1200px; cursor:pointer; transition:transform .25s ease; position:relative; }
+    .pile-card:hover { transform:scale(1.03); }
+
+    .pile-card-inner {
+      position:relative; width:100%; height:100%;
+      transition: transform .7s cubic-bezier(.2,.9,.3,1);
+      transform-style:preserve-3d;
+      border-radius:20px;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.12);
+      overflow:visible; /* allow shine/confetti to show */
+      will-change: transform;
     }
+    .pile-card.flipped .pile-card-inner { transform: rotateY(180deg); }
 
-    .small-btn:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-      transform: none;
-    }
-
-    /* Improved Tarot Card Design - Same Size */
-    .luck-card-wrap {
-      display: flex;
-      justify-content: center;
-      margin-top: 18px;
-      perspective: 1000px;
-    }
-
-    .card-scene {
-      width: 260px;
-      height: 340px;
-      position: relative;
-    }
-
-    .card-inner {
-      width: 100%;
-      height: 100%;
-      position: relative;
-      transform-style: preserve-3d;
-      transition: transform 0.7s cubic-bezier(0.2, 0.9, 0.3, 1);
-    }
-
-    .card-face {
-      position: absolute;
-      inset: 0;
+    /* both faces must explicitly hide backface and have explicit transforms */
+    .pile-card-front, .pile-card-back {
+      position:absolute; width:100%; height:100%;
+      -webkit-backface-visibility: hidden;
       backface-visibility: hidden;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-      background: #fff;
-      text-align: center;
+      border-radius:20px; display:flex; flex-direction:column; justify-content:center; align-items:center;
+      top:0; left:0;
+      overflow:hidden;
     }
 
-    /* Card Back - Tarot Style */
-    .card-back {
-      border: 2px solid var(--accent);
-      background: linear-gradient(135deg, rgba(119, 191, 163, 0.08), rgba(95, 168, 141, 0.04));
-      transform: rotateY(0deg);
-      font-weight: 700;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      gap: 12px;
+    /* front face - image only */
+    .pile-card-front {
+      transform: rotateY(0deg); /* explicit */
+      background: linear-gradient(135deg, #a8e6cf, #dcedc1);
+      border:4px solid rgba(255,255,255,0.35);
+      z-index: 2; /* front initially on top */
+    }
+    .pile-image { width:100%; height:100%; object-fit:cover; border-radius:16px; transition: transform .3s; display:block; }
+    .pile-card:hover .pile-image { transform:scale(1.02); }
+
+    /* back face - message only, no image */
+    .pile-card-back {
+      transform: rotateY(180deg); /* explicit */
+      background: linear-gradient(135deg,#fff,#f9f9f9);
+      border:3px solid var(--accent);
+      padding: 40px 30px;
+      text-align:center;
+      z-index: 1;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .pile-message { font-size:1.4rem; line-height:1.6; font-weight:500; font-style:italic; color:#264d32; }
+
+    /* Ensure correct stacking when flipped */
+    .pile-card.flipped .pile-card-front { z-index: 1; }
+    .pile-card.flipped .pile-card-back { z-index: 2; }
+
+    .card-shine {
+      position:absolute; top:0; left:-100%; width:50%; height:100%;
+      background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0) 100%);
+      transform:skewX(-25deg); transition:left .75s; z-index:3;
+    }
+    .pile-card-front:hover .card-shine { left:150%; }
+
+    .confetti { position:absolute; inset:-15px; pointer-events:none; display:none; z-index:10; }
+    .confetti.show { display:block; }
+    .confetti-piece { position:absolute; width:12px; height:24px; background:var(--confetti-color,#77bfa3); top:0; opacity:0; }
+
+    .pick-counter { font-size:.9rem; color:var(--muted); background:#f5f5f5; padding:8px 16px; border-radius:20px; margin-top:8px; }
+
+    /* Affirmation section (with small images above each card) */
+    .affirmation-section {
+      background: var(--card-bg);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
       padding: 20px;
+      flex: 1;
+      transition: transform .3s, box-shadow .3s;
     }
+    .affirmation-section:hover { transform: translateY(-4px); box-shadow:0 15px 35px rgba(0,0,0,0.1); }
+    .affirmation-section h3 { margin-top:0; color:var(--accent); }
 
-    .back-graphic {
-      width: 100px;
-      height: 100px;
-      border-radius: 50%;
-      background: radial-gradient(circle at 30% 30%, rgba(119, 191, 163, 0.3), rgba(95, 168, 141, 0.1));
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.8rem;
-      margin-bottom: 8px;
-    }
+    .affirmation-list { list-style:none; padding:0; margin-top:12px; display:grid; gap:12px; }
 
-    /* Card Front - Now matches back card design exactly */
-    .card-front {
-      transform: rotateY(180deg);
-      border: 2px solid var(--accent);
-      background: linear-gradient(135deg, rgba(119, 191, 163, 0.08), rgba(95, 168, 141, 0.04));
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      gap: 12px;
-      padding: 20px;
-    }
-
-    .card-front .message {
-      font-size: 1.15rem;
-      color: #264d32;
-      line-height: 1.5;
-      font-weight: 500;
-      margin-bottom: 8px;
-    }
-
-    .card-front .meta {
-      font-size: 0.85rem;
-      color: var(--muted);
-    }
-
-    .card-inner.flipped {
-      transform: rotateY(180deg);
-    }
-
-    /* Confetti */
-    .confetti {
-      position: absolute;
-      inset: -10px;
-      pointer-events: none;
-      display: none;
-      z-index: 10;
-    }
-
-    .confetti.show {
-      display: block;
-      animation: confetti-fall 1200ms linear;
-    }
-
-    @keyframes confetti-fall {
-      0% {
-        opacity: 0;
-        transform: translateY(-20px) scale(0.8);
-      }
-      30% {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-      }
-      100% {
-        transform: translateY(60px) scale(1);
-        opacity: 0;
-      }
-    }
-
-    /* Improved Affirmations (keeping my design) */
-    .affirmation-section h3 {
-      margin-top: 0;
-      color: var(--accent);
-    }
-
-    .affirmation-list {
-      list-style: none;
-      padding: 0;
-      margin-top: 12px;
-      display: grid;
-      gap: 14px;
-    }
-
+    /* --- Compact aff card style (smaller images) --- */
     .aff-card {
       background: #f9f9f9;
-      padding: 18px;
+      padding: 12px 14px;
       border-radius: 12px;
-      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+      box-shadow: 0 4px 14px rgba(0,0,0,0.04);
       color: var(--muted);
       border-left: 4px solid var(--accent);
-      transition: all 0.3s ease;
+      transition: all .25s ease;
       position: relative;
       overflow: hidden;
+      min-height: 110px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
     }
 
-    .aff-card:hover {
-      transform: translateX(8px);
-      background: #f1f1f1;
+    .aff-card:hover { transform: translateX(6px); background:#f1f1f1; }
+
+    .aff-image-wrap { width: 96px; flex: 0 0 96px; display:flex; align-items:center; justify-content:center; margin-right:8px; }
+    .aff-image {
+      width: 100%;
+      max-width: 160px;
+      height: 96px;
+      object-fit: cover;
+      border-radius: 8px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+      border: 1px solid rgba(0,0,0,0.04);
     }
 
-    .aff-card::before {
-      content: '"';
-      position: absolute;
-      top: 10px;
-      left: 15px;
-      font-size: 3rem;
-      color: var(--accent-light);
-      line-height: 1;
-      font-family: serif;
-    }
+    .aff-text { position:relative; z-index:1; font-style: italic; font-size:0.95rem; }
+    .aff-cat { font-size:0.8rem; color:var(--muted-light); margin-top:6px; text-transform:capitalize; }
 
-    .aff-text {
-      position: relative;
-      z-index: 1;
-      padding-left: 10px;
-      font-style: italic;
-    }
-
-    .aff-cat {
-      font-size: 0.85rem;
-      color: var(--muted-light);
-      margin-top: 10px;
-      text-transform: capitalize;
-    }
-
-    /* Welcome Message */
     .welcome-message {
       background: var(--card-bg);
       color: var(--muted);
       padding: 20px 24px;
       border-radius: var(--radius);
       margin-bottom: 24px;
-      max-width: 1100px;
+      max-width: var(--max-container-width);
       width: 100%;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-      text-align: center;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+      text-align:center;
+    }
+    .welcome-message h2 { margin-bottom:8px; color:var(--accent); font-weight:600; }
+    .welcome-message p { opacity:.9; margin:0; }
+
+    /* Responsive tweaks */
+    @media (max-width: 1200px) {
+      :root { --tarot-width: 250px; --tarot-height: 430px; --max-container-width: 90%; }
     }
 
-    .welcome-message h2 {
-      margin-bottom: 8px;
-      color: var(--accent);
-      font-weight: 600;
-    }
-
-    .welcome-message p {
-      opacity: 0.9;
-      margin: 0;
-    }
-
-    /* Responsive */
     @media (max-width: 900px) {
-      .dashboard-container {
-        flex-direction: column;
-      }
-
-      .navbar {
-        padding: 16px;
-      }
-
-      .card-scene {
-        width: 240px;
-        height: 320px;
-      }
+      .dashboard-container { flex-direction:column; gap:28px; }
+      .pile-section, .affirmation-section { flex:1; }
+      .pile-cards-container { flex-direction:column; align-items:center; gap:25px; }
+      .pile-card { width: 80%; height: 380px; max-width: 350px; }
+      .aff-card { min-height: 90px; padding:10px; }
+      .aff-image { height: 80px; }
+      .aff-image-wrap { flex: 0 0 80px; width:80px; }
     }
 
     @media (max-width: 480px) {
-      .section-head {
-        flex-direction: column;
-        gap: 16px;
-        align-items: stretch;
-      }
-
-      .small-btn {
-        justify-content: center;
-      }
-
-      .card-scene {
-        width: 220px;
-        height: 300px;
-      }
+      .section-head { flex-direction:column; gap:12px; align-items:stretch; }
+      .draw-btn { width:100%; justify-content:center; }
+      .pile-message { font-size:1.1rem; }
+      .aff-text { font-size:0.92rem; }
     }
+
   </style>
 </head>
 <body>
 
-  <!-- Welcome Message -->
   <div class="welcome-message">
     <h2>Welcome back, {{ request.user.username }}! 🌟</h2>
-    <p>Your daily dose of positivity and inspiration awaits</p>
+    <p>Choose an image that calls to you and discover your message</p>
   </div>
 
-  <!-- Navbar -->
   <nav class="navbar">
-    <div class="nav-left">
-      <h2 class="logo">DailySoul</h2>
-    </div>
+    <div class="nav-left"><h2 class="logo">DailySoul</h2></div>
     <div class="nav-links">
       <a href="{% url 'dashboard' %}">Home</a>
       <a href="/journal/">Journal</a>
@@ -393,47 +260,63 @@
     </div>
   </nav>
 
-  <!-- Main Dashboard -->
   <div class="dashboard-container">
 
-    <!-- Luck Card Section -->
-    <div class="luck-section">
+    <div class="pile-section">
       <div class="section-head">
-        <h3>✨ Today's Luck Card</h3>
-        <button id="drawLuckBtn" class="small-btn">
-          <span>🔄 Draw</span>
-        </button>
+        <h3>Pick Your Luck Card</h3>
+        <div style="display:flex; flex-direction:column; align-items:flex-end;">
+          <button id="drawBtn" class="draw-btn"><span>🔄 Shuffle</span></button>
+          <div id="pickCounter" class="pick-counter" style="margin-top:8px;">Draws today: 0/3</div>
+          <div id="drawNotice" style="margin-top:8px;color:#6b6b6b;font-size:0.95rem;"></div>
+        </div>
       </div>
 
-      <div class="luck-card-wrap">
-        <div class="card-scene">
-          <div class="card-inner" id="cardInner">
-            <!-- Card Back -->
-            <div class="card-face card-back" id="cardBack">
-              <div>
-                <div class="back-graphic">🎴</div>
-                <div style="margin-top: 12px; font-size: 0.95rem; color: var(--muted);">
-                  Click Draw to reveal your luck
-                </div>
-              </div>
+      <div class="pile-cards-container">
+        <div class="pile-card" data-pile="1" id="pile1">
+          <div class="pile-card-inner">
+            <div class="pile-card-front">
+              <div class="card-shine"></div>
+              <img src="{% static 'images/card1.jpg' %}" alt="Fortune Card 1" class="pile-image" id="image1">
             </div>
-
-            <!-- Card Front - Now matches back card design exactly -->
-            <div class="card-face card-front" id="cardFront">
-              <div>
-                <div class="message" id="frontMessage">Your luck will appear here</div>
-                <div class="meta" id="frontMeta">Freshly drawn for you</div>
-              </div>
+            <div class="pile-card-back">
+              <div class="card-shine"></div>
+              <div class="pile-message" id="message1">Click to reveal your message</div>
             </div>
           </div>
+          <div class="confetti" id="confetti1"></div>
+        </div>
 
-          <!-- Confetti Effect -->
-          <div class="confetti" id="confettiArea"></div>
+        <div class="pile-card" data-pile="2" id="pile2">
+          <div class="pile-card-inner">
+            <div class="pile-card-front">
+              <div class="card-shine"></div>
+              <img src="{% static 'images/card2.jpg' %}" alt="Fortune Card 2" class="pile-image" id="image2">
+            </div>
+            <div class="pile-card-back">
+              <div class="card-shine"></div>
+              <div class="pile-message" id="message2">Click to reveal your message</div>
+            </div>
+          </div>
+          <div class="confetti" id="confetti2"></div>
+        </div>
+
+        <div class="pile-card" data-pile="3" id="pile3">
+          <div class="pile-card-inner">
+            <div class="pile-card-front">
+              <div class="card-shine"></div>
+              <img src="{% static 'images/card3.jpg' %}" alt="Fortune Card 3" class="pile-image" id="image3">
+            </div>
+            <div class="pile-card-back">
+              <div class="card-shine"></div>
+              <div class="pile-message" id="message3">Click to reveal your message</div>
+            </div>
+          </div>
+          <div class="confetti" id="confetti3"></div>
         </div>
       </div>
     </div>
 
-    <!-- Affirmations Section -->
     <div class="affirmation-section">
       <div class="section-head">
         <h3>🌿 Today's Affirmations</h3>
@@ -443,130 +326,218 @@
         {% if affirmations %}
           {% for a in affirmations %}
             <li class="aff-card">
-              <div class="aff-text">{{ a.text }}</div>
+              <div class="aff-image-wrap">
+                {% if a.image %}
+                  <img src="{{ a.image.url }}" alt="{{ a.category|default:'Affirmation' }}" class="aff-image" loading="lazy">
+                {% else %}
+                  <img src="{% static 'images/affirmation-thumb.jpg' %}" alt="Affirmation" class="aff-image" loading="lazy">
+                {% endif %}
+              </div>
+              <div style="flex:1;">
+                <div class="aff-text">{{ a.text }}</div>
+                {% if a.category %}
+                  <div class="aff-cat">{{ a.category }}</div>
+                {% endif %}
+              </div>
             </li>
           {% endfor %}
         {% else %}
           <li class="aff-card">
+            <div class="aff-image-wrap">
+              <img src="{% static 'images/affirmation-thumb.jpg' %}" alt="Affirmation" class="aff-image" loading="lazy">
+            </div>
             <div class="aff-text">Loading your daily affirmations…</div>
           </li>
         {% endif %}
       </ul>
     </div>
+
   </div>
 
   <script>
     (function(){
-      const drawBtn = document.getElementById('drawLuckBtn');
-      const cardInner = document.getElementById('cardInner');
-      const frontMessage = document.getElementById('frontMessage');
-      const confettiArea = document.getElementById('confettiArea');
+      const pileCards = document.querySelectorAll('.pile-card');
+      const drawBtn = document.getElementById('drawBtn');
+      const pickCounter = document.getElementById('pickCounter');
+      const drawNotice = document.getElementById('drawNotice');
 
-      // Confetti function
-      function showConfetti() {
+      let drawCount = 0;
+      const maxDraws = 3;
+
+      function showConfetti(cardId) {
+        const confettiArea = document.getElementById(cardId);
+        if (!confettiArea) return;
         confettiArea.innerHTML = '';
-        const colors = ['#77bfa3', '#f59e0b', '#ef4444', '#3b82f6', '#8b5cf6'];
-
-        for (let i = 0; i < 10; i++) {
+        const colors = ['#77bfa3', '#5fa88d', '#e8f5e9', '#fff3e0', '#ffffff'];
+        for (let i = 0; i < 20; i++) {
           const confetti = document.createElement('div');
-          confetti.style.position = 'absolute';
-          confetti.style.width = Math.random() * 10 + 5 + 'px';
-          confetti.style.height = confetti.style.width;
-          confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+          confetti.className = 'confetti-piece';
+          confetti.style.setProperty('--confetti-color', colors[Math.floor(Math.random() * colors.length)]);
           confetti.style.left = Math.random() * 100 + '%';
-          confetti.style.top = '10%';
-          confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
-          confetti.style.opacity = '0.9';
+          confetti.style.width = Math.random() * 10 + 6 + 'px';
+          confetti.style.height = Math.random() * 10 + 18 + 'px';
+          confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+          const animationDuration = Math.random() * 1000 + 800;
+          const animationDelay = Math.random() * 500;
+          confetti.style.animation = `confetti-fall ${animationDuration}ms ease-out ${animationDelay}ms forwards`;
           confettiArea.appendChild(confetti);
-
-          setTimeout(() => {
-            confetti.style.transition = 'all 1000ms ease-out';
-            confetti.style.transform = `translateY(80px) rotate(${Math.random() * 360}deg)`;
-            confetti.style.opacity = '0';
-          }, 50 * i);
         }
-
         confettiArea.classList.add('show');
         setTimeout(() => {
           confettiArea.classList.remove('show');
           confettiArea.innerHTML = '';
-        }, 1200);
+        }, 1800);
       }
 
-      async function drawLuck() {
-        if (drawBtn.disabled) return;
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes confetti-fall {
+          0% { opacity: 1; transform: translateY(-20px) rotate(0deg); }
+          100% { opacity: 0; transform: translateY(120px) rotate(360deg); }
+        }
+        .confetti-piece { background: var(--confetti-color); display:block; position:absolute; border-radius:2px; }
+      `;
+      document.head.appendChild(style);
 
-        drawBtn.disabled = true;
-        drawBtn.innerHTML = '<span>🌀 Drawing...</span>';
+      function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+          const cookies = document.cookie.split(';');
+          for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+              cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+              break;
+            }
+          }
+        }
+        return cookieValue;
+      }
 
+      function generateDefaultPiles() {
+        const messages = [
+          "Trust your inner voice—it knows the way",
+          "Every challenge helps you grow stronger",
+          "Find balance in all aspects of life"
+        ];
+        return [
+          { id: 1, image_url: "{% static 'images/card1.jpg' %}", message: messages[0] },
+          { id: 2, image_url: "{% static 'images/card2.jpg' %}", message: messages[1] },
+          { id: 3, image_url: "{% static 'images/card3.jpg' %}", message: messages[2] }
+        ];
+      }
+
+      async function getNewPilesRaw() {
         try {
-          const res = await fetch("{% url 'api_draw_luck' %}", {
+          const res = await fetch("{% url 'api_get_piles' %}", {
             method: 'GET',
             credentials: 'same-origin',
-            headers: {'X-Requested-With': 'XMLHttpRequest'}
+            headers: {
+              'X-Requested-With': 'XMLHttpRequest',
+              'X-CSRFToken': getCookie('csrftoken')
+            }
           });
-
-          if (!res.ok) {
-            const err = await res.json().catch(() => ({error: 'No luck cards available.'}));
-            throw new Error(err.error || 'Could not draw card.');
-          }
-
-          const data = await res.json();
-
-          // Update card content
-          frontMessage.textContent = data.message || 'Good things are coming your way!';
-
-          // Trigger flip animation
-          setTimeout(() => {
-            cardInner.classList.add('flipped');
-            showConfetti();
-          }, 100);
-
-        } catch (error) {
-          console.error('Error drawing luck:', error);
-          frontMessage.textContent = error.message;
-        } finally {
-          drawBtn.disabled = false;
-          drawBtn.innerHTML = '<span>🔄 Draw</span>';
+          const data = await res.json().catch(() => null);
+          if (data && data.piles && Array.isArray(data.piles) && data.piles.length) return data;
+          if (res.ok) return { piles: generateDefaultPiles(), remaining_draws: data && data.remaining_draws != null ? data.remaining_draws : maxDraws - drawCount, draw_allowed: data && typeof data.draw_allowed === 'boolean' ? data.draw_allowed : true };
+          console.warn('getNewPilesRaw: non-ok response or no usable body', res.status, data);
+          return { piles: generateDefaultPiles(), remaining_draws: data && data.remaining_draws != null ? data.remaining_draws : Math.max(0, maxDraws - drawCount), draw_allowed: data && typeof data.draw_allowed === 'boolean' ? data.draw_allowed : true, message: data && data.message ? data.message : null };
+        } catch (err) {
+          console.error('Network error fetching piles:', err);
+          return { piles: generateDefaultPiles(), remaining_draws: Math.max(0, maxDraws - drawCount), draw_allowed: true };
         }
       }
 
-      // Event listeners
-      if (drawBtn) {
-        drawBtn.addEventListener('click', drawLuck);
+      function updatePileCards(piles) {
+        piles.forEach((pile, idx) => {
+          const i = idx + 1;
+          const img = document.getElementById(`image${i}`);
+          const msg = document.getElementById(`message${i}`);
+          if (img) { img.src = pile.image_url; img.alt = `Fortune Card ${i}`; }
+          if (msg) msg.textContent = pile.message || '';
+        });
       }
 
-      // Auto-fetch affirmations if not provided
-      (async function fetchAffirmations() {
-        if ({% if affirmations %}true{% else %}false{% endif %}) return;
+      function resetCards() {
+        pileCards.forEach(card => card.classList.remove('flipped'));
+      }
 
-        try {
-          const res = await fetch('/api/daily-affirmations/', {
-            credentials: 'same-origin'
-          });
+      async function drawNewCards() {
+        if (drawBtn.disabled) return;
+        drawBtn.disabled = true;
+        drawBtn.innerHTML = '<span>🌀 Drawing...</span>';
 
-          if (!res.ok) throw new Error('Failed to load affirmations');
+        const data = await getNewPilesRaw();
+        const piles = data.piles || generateDefaultPiles();
+        updatePileCards(piles);
+        resetCards();
 
-          const json = await res.json();
-          const affirmations = json.affirmations || [];
+        const remaining = (typeof data.remaining_draws === 'number') ? data.remaining_draws : Math.max(0, maxDraws - (drawCount + 1));
+        const drawAllowed = (typeof data.draw_allowed === 'boolean') ? data.draw_allowed : (remaining > 0);
 
-          if (affirmations.length === 0) {
-            document.getElementById('affirmationList').innerHTML =
-              '<li class="aff-card"><div class="aff-text">No affirmations available today. Check back tomorrow!</div></li>';
-            return;
+        if (data && ('remaining_draws' in data) && typeof data.remaining_draws === 'number') {
+          drawCount = maxDraws - data.remaining_draws;
+          if (drawCount < 0) drawCount = 0;
+        } else {
+          drawCount = Math.min(maxDraws, drawCount + 1);
+        }
+
+        if (pickCounter) pickCounter.textContent = `Draws today: ${drawCount}/${maxDraws}`;
+
+        showConfetti('confetti1');
+        setTimeout(()=>showConfetti('confetti2'), 180);
+        setTimeout(()=>showConfetti('confetti3'), 360);
+
+        if (!drawAllowed || remaining <= 0) {
+          drawBtn.disabled = true;
+          drawBtn.innerHTML = `<span>✅ Done for today</span>`;
+          if (drawNotice) drawNotice.textContent = data && data.message ? data.message : "You've reached your shuffles for today. Come back tomorrow!";
+        } else {
+          drawBtn.disabled = false;
+          drawBtn.innerHTML = '<span>🔄 Shuffle </span>';
+          if (drawNotice) drawNotice.textContent = '';
+        }
+      }
+
+      // Flip behavior: toggle flipped class on the card element
+      pileCards.forEach(card => {
+        card.addEventListener('click', function() {
+          const wasFlipped = this.classList.contains('flipped');
+          this.classList.toggle('flipped');
+          if (!wasFlipped) {
+            const id = this.dataset.pile;
+            showConfetti(`confetti${id}`);
           }
+        });
+      });
 
-          const html = affirmations.map(a => `
-            <li class="aff-card">
-              <div class="aff-text">${a.text}</div>
-            </li>
-          `).join('');
+      drawBtn.addEventListener('click', drawNewCards);
 
-          document.getElementById('affirmationList').innerHTML = html;
-        } catch (error) {
-          console.error('Error fetching affirmations:', error);
-          document.getElementById('affirmationList').innerHTML =
-            '<li class="aff-card"><div class="aff-text">Unable to load affirmations. Please try refreshing.</div></li>';
+      (async function initialize() {
+        const data = await getNewPilesRaw();
+        const piles = data.piles || generateDefaultPiles();
+        updatePileCards(piles);
+
+        if (typeof data.remaining_draws === 'number') {
+          drawCount = maxDraws - data.remaining_draws;
+          if (drawCount < 0) drawCount = 0;
+        } else {
+          drawCount = 0;
+        }
+
+        if (pickCounter) pickCounter.textContent = `Draws today: ${drawCount}/${maxDraws}`;
+
+        const drawAllowed = (typeof data.draw_allowed === 'boolean') ? data.draw_allowed : true;
+        const remaining = (typeof data.remaining_draws === 'number') ? data.remaining_draws : (maxDraws - drawCount);
+
+        if (!drawAllowed || remaining <= 0) {
+          drawBtn.disabled = true;
+          drawBtn.innerHTML = `<span>✅ Done for today</span>`;
+          if (drawNotice) drawNotice.textContent = data && data.message ? data.message : "You've reached your shuffles for today. Come back tomorrow!";
+        } else {
+          drawBtn.disabled = false;
+          drawBtn.innerHTML = '<span>🔄 Shuffle </span>';
+          if (drawNotice) drawNotice.textContent = '';
         }
       })();
 

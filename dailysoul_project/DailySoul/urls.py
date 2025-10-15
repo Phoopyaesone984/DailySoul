@@ -9,5 +9,5 @@ urlpatterns = [
     path('dashboard/', views.dashboard, name='dashboard'),
     path('affirmations/', views.affirmations_page, name='affirmations'),
     path('draw_affirmation/', views.draw_affirmation, name='draw_affirmation'),
-    path('api/draw-luck/', views.draw_luck_api, name='api_draw_luck'),
+    path('api/get-piles/', views.api_get_piles, name='api_get_piles'),
 ]

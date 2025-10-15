@@ -105,20 +105,135 @@ def dashboard(request):
         'affirmations': affirmations
     })
 
+# views.py (add or replace api_get_piles)
+from django.db import transaction
 from django.http import JsonResponse
-from django.views.decorators.http import require_GET
-from django.contrib.auth.decorators import login_required
-from .models import LuckCard
+from django.utils import timezone
+from django.templatetags.static import static
+from .models import LuckCard, DailyPileDraw, PileCardSelection
 import random
-@login_required
-@require_GET
-def draw_luck_api(request):
-    qs = LuckCard.objects.all()
-    if not qs.exists():
-        return JsonResponse({'error': 'No luck cards available.'}, status=404)
 
-    card = random.choice(list(qs))
-    return JsonResponse({
-        'message': card.message,
-        'image': card.image.url if card.image else ''  # Add this line
-    })
+MAX_DRAWS_PER_DAY = 3
+
+def api_get_piles(request):
+    # Only GET allowed
+    if request.method != 'GET':
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'Authentication required'}, status=401)
+
+    today = timezone.now().date()
+
+    try:
+        # Get or create today's draw record
+        daily_draw, created = DailyPileDraw.objects.get_or_create(
+            user=request.user,
+            date=today,
+            defaults={'draw_count': 0}
+        )
+
+        available_cards = list(LuckCard.objects.all())
+
+        if len(available_cards) < 3:
+            # Not enough cards to pick from — let the frontend know
+            return JsonResponse({
+                'piles': [],
+                'remaining_draws': max(0, MAX_DRAWS_PER_DAY - daily_draw.draw_count),
+                'draw_allowed': daily_draw.draw_count < MAX_DRAWS_PER_DAY,
+                'message': 'Not enough cards available'
+            }, status=200)
+
+        # If user already reached maximum draws, return the existing saved selections if present
+        if daily_draw.draw_count >= MAX_DRAWS_PER_DAY:
+            selections = PileCardSelection.objects.filter(daily_draw=daily_draw).order_by('position')
+            if selections.exists():
+                piles_data = []
+                for sel in selections:
+                    card = sel.card
+                    # safe image URL: absolute if possible, fallback to static
+                    try:
+                        image_url = request.build_absolute_uri(card.image.url) if card.image else request.build_absolute_uri(static('images/default-card.jpg'))
+                    except Exception:
+                        image_url = card.image.url if card.image else static('images/default-card.jpg')
+
+                    piles_data.append({
+                        'id': sel.position,
+                        'image_url': image_url,
+                        'message': card.message or ''
+                    })
+
+                return JsonResponse({
+                    'piles': piles_data,
+                    'remaining_draws': 0,
+                    'draw_allowed': False,
+                    'message': 'Maximum draws reached for today'
+                }, status=200)
+            else:
+                # Edge case: draw_count says used but no saved selections
+                # Return a random (non-saved) sample to allow frontend to display images
+                sample = random.sample(available_cards, 3)
+                piles_data = []
+                for idx, card in enumerate(sample, start=1):
+                    try:
+                        image_url = request.build_absolute_uri(card.image.url) if card.image else request.build_absolute_uri(static('images/default-card.jpg'))
+                    except Exception:
+                        image_url = card.image.url if card.image else static('images/default-card.jpg')
+
+                    piles_data.append({
+                        'id': idx,
+                        'image_url': image_url,
+                        'message': card.message or ''
+                    })
+
+                return JsonResponse({
+                    'piles': piles_data,
+                    'remaining_draws': 0,
+                    'draw_allowed': False,
+                    'message': 'Maximum draws reached for today (no saved selections found)'
+                }, status=200)
+
+        # At this point user is allowed to draw (draw_count < MAX)
+        with transaction.atomic():
+            selected_cards = random.sample(available_cards, 3)
+
+            # Clear previous saved selections for this daily_draw and create new ones
+            PileCardSelection.objects.filter(daily_draw=daily_draw).delete()
+            created_selections = []
+            for i, card in enumerate(selected_cards, start=1):
+                sel = PileCardSelection.objects.create(
+                    daily_draw=daily_draw,
+                    card=card,
+                    position=i
+                )
+                created_selections.append(sel)
+
+            # Increment draw count and save
+            daily_draw.draw_count += 1
+            daily_draw.save()
+
+        # Build response payload
+        piles_data = []
+        for i, sel in enumerate(created_selections, start=1):
+            card = sel.card
+            try:
+                image_url = request.build_absolute_uri(card.image.url) if card.image else request.build_absolute_uri(static('images/default-card.jpg'))
+            except Exception:
+                image_url = card.image.url if card.image else static('images/default-card.jpg')
+
+            piles_data.append({
+                'id': i,
+                'image_url': image_url,
+                'message': card.message or ''
+            })
+
+        remaining = max(0, MAX_DRAWS_PER_DAY - daily_draw.draw_count)
+        return JsonResponse({
+            'piles': piles_data,
+            'remaining_draws': remaining,
+            'draw_allowed': remaining > 0
+        }, status=200)
+
+    except Exception as exc:
+        # Safe error response for debugging (in production you might want to log and return a generic message)
+        return JsonResponse({'error': str(exc)}, status=500)
