@@ -237,3 +237,85 @@ def api_get_piles(request):
     except Exception as exc:
         # Safe error response for debugging (in production you might want to log and return a generic message)
         return JsonResponse({'error': str(exc)}, status=500)
+
+from django.contrib import messages
+from django.shortcuts import render, redirect, get_object_or_404
+from django.utils import timezone
+from django.db.models import Count
+from collections import OrderedDict
+from .models import JournalEntry
+
+
+def journal(request):
+    # Get today's entries
+    today = timezone.now().date()
+    todays_entries = JournalEntry.objects.filter(
+        user=request.user,
+        created_at__date=today
+    ).order_by('-created_at')
+
+    # Get all entries grouped by date
+    all_entries = JournalEntry.objects.filter(user=request.user).order_by('-created_at')
+
+    # Group entries by date
+    entries_by_date = OrderedDict()
+    for entry in all_entries:
+        date_key = entry.created_at.date()
+        if date_key not in entries_by_date:
+            entries_by_date[date_key] = []
+        entries_by_date[date_key].append(entry)
+
+    # Calculate streak (you might want to adjust this logic)
+    streak = calculate_streak(request.user)
+
+    if request.method == 'POST':
+        entry_id = request.POST.get('entry_id')
+        title = request.POST.get('title', '').strip()
+        content = request.POST.get('content', '').strip()
+
+        if entry_id:
+            # Editing an existing entry
+            entry = get_object_or_404(JournalEntry, id=entry_id, user=request.user)
+            entry.title = title
+            entry.content = content
+            entry.save()
+            messages.success(request, 'Entry updated successfully!')
+        else:
+            # Creating a new entry
+            JournalEntry.objects.create(
+                user=request.user,
+                title=title,
+                content=content
+            )
+            messages.success(request, 'Entry saved successfully!')
+
+        return redirect('journal')
+
+    context = {
+        'todays_entries': todays_entries,
+        'entries_by_date': entries_by_date,
+        'streak': streak,
+        'current_date': timezone.now(),
+    }
+
+    return render(request, 'journal.html', context)
+
+
+def calculate_streak(user):
+    # This is a simple streak calculation - you might want to improve it
+    entries = JournalEntry.objects.filter(user=user).order_by('-created_at')
+    if not entries:
+        return 0
+
+    # Count consecutive days with at least one entry
+    streak = 0
+    current_date = timezone.now().date()
+
+    while True:
+        if entries.filter(created_at__date=current_date).exists():
+            streak += 1
+            current_date -= timezone.timedelta(days=1)
+        else:
+            break
+
+    return streak

@@ -1,0 +1,205 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}DailySoul{% endblock %}</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+  /* --- Global & Theme --- */
+  :root {
+    --bg1: #e8f5e9;
+    --bg2: #fff3e0;
+    --accent: #77bfa3;
+    --accent-dark: #5fa88d;
+    --accent-light: #e8f5e9;
+    --muted: #555;
+    --muted-light: #777;
+    --card-bg: #ffffff;
+    --radius: 16px;
+    --radius-lg: 20px;
+    --tarot-width: 280px;
+    --tarot-height: 480px;
+    --max-container-width: 1400px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; font-family: 'Poppins', sans-serif; }
+  body {
+    background: linear-gradient(135deg, var(--bg1), var(--bg2));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 30px 16px 40px; /* PADDING APPLIED GLOBALLY */
+    color: #222;
+    line-height: 1.6;
+  }
+
+  /* --- Navbar (Stays the same) --- */
+  .navbar {
+    /* ... (Existing Navbar Styles) ... */
+    max-width: var(--max-container-width);
+    margin-bottom: 32px;
+  }
+
+  /* --- Layout Containers --- */
+  main {
+    max-width: var(--max-container-width);
+    width: 100%;
+    margin: 0 auto;
+    padding: 0; /* Remove extra padding here if body has padding */
+  }
+  .dashboard-container, .journal-grid {
+    display: flex;
+    gap: 35px;
+    width: 100%;
+  }
+
+  /* --- Shared Card Styles --- */
+  .welcome-message {
+    background: var(--card-bg);
+    color: var(--muted);
+    padding: 20px 24px;
+    border-radius: var(--radius);
+    margin-bottom: 24px;
+    max-width: var(--max-container-width);
+    width: 100%;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    text-align:center;
+  }
+  .welcome-message h2 { margin-bottom:8px; color:var(--accent); font-weight:600; }
+  .section-head { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:20px; }
+  .section-head h3 { margin:0; color:var(--accent); font-size:1.4rem; }
+
+  /* --- Journal Specific Styles (Adopted from Dashboard style) --- */
+  .journal-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 24px;
+      width: 100%;
+  }
+  .journal-card {
+    background: var(--card-bg);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    padding: 30px;
+    flex: 2; /* Main content area */
+  }
+  .sidebar {
+    background: var(--card-bg);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    padding: 20px;
+    flex: 1; /* Sidebar area */
+  }
+
+  .streak-card {
+    background: var(--accent);
+    color: white;
+    padding: 10px 18px;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  }
+
+  /* Journal form elements */
+  .journal-form input, .journal-form textarea {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1rem;
+    resize: vertical;
+  }
+  .journal-form textarea {
+    min-height: 400px; /* Ensure space for writing */
+  }
+  .journal-form input {
+    font-weight: 600;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: background 0.3s;
+    float: right;
+  }
+  .btn-primary:hover {
+    background: var(--accent-dark);
+  }
+
+  /* Past Entries (Sidebar) */
+  .entry-card {
+    background: #f7fcf7;
+    border-radius: 12px;
+    padding: 15px;
+    border: 1px solid #eee;
+    transition: background 0.2s;
+  }
+  .entry-card:hover { background: #f0f7f0; }
+  .entry-meta { display:flex; justify-content:space-between; margin-bottom:5px; }
+  .entry-title { font-weight:600; color:#333; }
+  .entry-date { font-size:0.8rem; color:var(--muted-light); }
+  .entry-snippet { font-size:0.9rem; color:var(--muted); line-height:1.4; }
+
+  /* --- Responsive Tweaks (Shared) --- */
+  @media (max-width: 900px) {
+    .dashboard-container, .journal-grid { flex-direction: column; gap: 28px; }
+    .journal-card, .sidebar { flex: 1; }
+    .journal-form textarea { min-height: 250px; }
+    .journal-top { flex-direction: column; align-items: flex-start; gap: 15px; }
+  }
+    /* Navbar */
+    .navbar {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: var(--card-bg);
+      padding: 18px 24px;
+      border-radius: var(--radius);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+      margin-bottom: 32px;
+      max-width: var(--max-container-width);
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .navbar .logo { color: var(--accent); font-weight: 600; font-size: 1.4rem; }
+    .navbar .nav-links a { text-decoration:none; color:var(--muted); margin-left:20px; font-weight:500; transition:color .25s; }
+    .navbar .nav-links a:hover { color:var(--accent-dark); }
+
+    main { max-width: var(--max-container-width); width: 100%; margin:0 auto; padding:0 16px; }
+
+</style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="nav-left"><h2 class="logo">DailySoul</h2></div>
+    <div class="nav-links">
+      <a href="{% url 'dashboard' %}">Home</a>
+      <a href="/journal/">Journal</a>
+      <a href="/deathnote/">DeathNote</a>
+      <a href="{% url 'logout' %}">Logout</a>
+    </div>
+  </nav>
+
+  <main>
+    {% block content %}
+    {% endblock %}
+  </main>
+
+</body>
+</html>

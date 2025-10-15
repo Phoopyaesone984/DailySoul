@@ -2,6 +2,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.models import User
+from .models import JournalEntry
 
 class RegisterForm(UserCreationForm):
     username = forms.CharField(
@@ -63,3 +64,13 @@ class LoginForm(AuthenticationForm):
         "autocomplete": "current-password",
         "required": True
     }))
+
+
+class JournalEntryForm(forms.ModelForm):
+    class Meta:
+        model = JournalEntry
+        fields = ['title', 'content']
+        widgets = {
+            'title': forms.TextInput(attrs={'placeholder': 'Entry title...', 'class': 'form-input'}),
+            'content': forms.Textarea(attrs={'placeholder': 'Write your thoughts...', 'class': 'form-textarea', 'rows': 6}),
+        }

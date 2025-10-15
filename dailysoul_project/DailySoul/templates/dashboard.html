@@ -1,4 +1,7 @@
+{% extends 'base.html' %}
 {% load static %}
+
+{% block content %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -38,22 +41,6 @@
       line-height: 1.6;
     }
 
-    /* Navbar */
-    .navbar {
-      width: 100%;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background-color: var(--card-bg);
-      padding: 18px 24px;
-      border-radius: var(--radius);
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-      margin-bottom: 32px;
-      max-width: var(--max-container-width);
-    }
-    .navbar .logo { color: var(--accent); font-weight: 600; font-size: 1.4rem; }
-    .navbar .nav-links a { text-decoration:none; color:var(--muted); margin-left:20px; font-weight:500; transition:color .25s; }
-    .navbar .nav-links a:hover { color:var(--accent-dark); }
 
     /* Layout */
     .dashboard-container {
@@ -249,16 +236,6 @@
     <h2>Welcome back, {{ request.user.username }}! 🌟</h2>
     <p>Choose an image that calls to you and discover your message</p>
   </div>
-
-  <nav class="navbar">
-    <div class="nav-left"><h2 class="logo">DailySoul</h2></div>
-    <div class="nav-links">
-      <a href="{% url 'dashboard' %}">Home</a>
-      <a href="/journal/">Journal</a>
-      <a href="/deathnote/">DeathNote</a>
-      <a href="{% url 'logout' %}">Logout</a>
-    </div>
-  </nav>
 
   <div class="dashboard-container">
 
@@ -543,6 +520,6 @@
 
     })();
   </script>
-
+{% endblock %}
 </body>
 </html>
