@@ -238,37 +238,55 @@ def api_get_piles(request):
         # Safe error response for debugging (in production you might want to log and return a generic message)
         return JsonResponse({'error': str(exc)}, status=500)
 
+
 from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
-from django.db.models import Count
+from django.contrib.auth.decorators import login_required
 from collections import OrderedDict
 from .models import JournalEntry
 
 
+@login_required
 def journal(request):
-    # Get today's entries
-    today = timezone.now().date()
-    todays_entries = JournalEntry.objects.filter(
-        user=request.user,
-        created_at__date=today
-    ).order_by('-created_at')
+    # Get user's timezone
+    user_timezone = timezone.get_current_timezone()
+    today_utc = timezone.now()
+    today_local = today_utc.astimezone(user_timezone).date()
 
-    # Get all entries grouped by date
+    # Get all entries for the user
     all_entries = JournalEntry.objects.filter(user=request.user).order_by('-created_at')
 
-    # Group entries by date
+    # Filter today's entries using Python (works with any database)
+    todays_entries = [
+        entry for entry in all_entries
+        if entry.created_at.astimezone(user_timezone).date() == today_local
+    ]
+
+    # Group entries by local date
     entries_by_date = OrderedDict()
     for entry in all_entries:
-        date_key = entry.created_at.date()
-        if date_key not in entries_by_date:
-            entries_by_date[date_key] = []
-        entries_by_date[date_key].append(entry)
+        local_date = entry.created_at.astimezone(user_timezone).date()
+        if local_date not in entries_by_date:
+            entries_by_date[local_date] = []
+        entries_by_date[local_date].append(entry)
 
-    # Calculate streak (you might want to adjust this logic)
-    streak = calculate_streak(request.user)
+    # Sort dates in descending order
+    entries_by_date = OrderedDict(sorted(entries_by_date.items(), key=lambda x: x[0], reverse=True))
+
+    # Calculate streak
+    streak = calculate_streak(request.user, user_timezone)
 
     if request.method == 'POST':
+        # Check if it's a delete request
+        if 'delete_id' in request.POST:
+            entry_id = request.POST.get('delete_id')
+            entry = get_object_or_404(JournalEntry, id=entry_id, user=request.user)
+            entry.delete()
+            messages.success(request, 'Journal entry deleted successfully!')
+            return redirect('journal')
+
+        # Handle regular form submission (create/update)
         entry_id = request.POST.get('entry_id')
         title = request.POST.get('title', '').strip()
         content = request.POST.get('content', '').strip()
@@ -301,20 +319,37 @@ def journal(request):
     return render(request, 'journal.html', context)
 
 
-def calculate_streak(user):
-    # This is a simple streak calculation - you might want to improve it
+def calculate_streak(user, user_timezone):
+    """Calculate the current streak of consecutive days with entries"""
     entries = JournalEntry.objects.filter(user=user).order_by('-created_at')
     if not entries:
         return 0
 
-    # Count consecutive days with at least one entry
     streak = 0
-    current_date = timezone.now().date()
+    current_date = timezone.now().astimezone(user_timezone).date()
 
+    # Check if there's an entry today
+    has_entry_today = any(
+        entry.created_at.astimezone(user_timezone).date() == current_date
+        for entry in entries
+    )
+
+    if not has_entry_today:
+        return 0
+
+    streak = 1
+    check_date = current_date - timezone.timedelta(days=1)
+
+    # Check consecutive previous days
     while True:
-        if entries.filter(created_at__date=current_date).exists():
+        has_entry = any(
+            entry.created_at.astimezone(user_timezone).date() == check_date
+            for entry in entries
+        )
+
+        if has_entry:
             streak += 1
-            current_date -= timezone.timedelta(days=1)
+            check_date -= timezone.timedelta(days=1)
         else:
             break
 

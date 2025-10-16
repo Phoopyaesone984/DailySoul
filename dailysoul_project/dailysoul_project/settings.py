@@ -106,11 +106,13 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
-
+# settings.py
+# In your settings.py file
+TIME_ZONE = 'Asia/Yangon'  # You can also use 'Asia/Rangoon'
+USE_TZ = True
 USE_I18N = True
 
-USE_TZ = True
+
 
 
 # Static files (CSS, JavaScript, Images)
