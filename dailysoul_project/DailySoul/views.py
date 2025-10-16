@@ -249,33 +249,22 @@ from .models import JournalEntry
 
 @login_required
 def journal(request):
-    # Get user's timezone
-    user_timezone = timezone.get_current_timezone()
-    today_utc = timezone.now()
-    today_local = today_utc.astimezone(user_timezone).date()
-
-    # Get all entries for the user
+    # Get all entries grouped by date
     all_entries = JournalEntry.objects.filter(user=request.user).order_by('-created_at')
 
-    # Filter today's entries using Python (works with any database)
-    todays_entries = [
-        entry for entry in all_entries
-        if entry.created_at.astimezone(user_timezone).date() == today_local
-    ]
-
-    # Group entries by local date
+    # Group entries by date
     entries_by_date = OrderedDict()
     for entry in all_entries:
-        local_date = entry.created_at.astimezone(user_timezone).date()
-        if local_date not in entries_by_date:
-            entries_by_date[local_date] = []
-        entries_by_date[local_date].append(entry)
+        date_key = entry.created_at.date()
+        if date_key not in entries_by_date:
+            entries_by_date[date_key] = []
+        entries_by_date[date_key].append(entry)
 
     # Sort dates in descending order
     entries_by_date = OrderedDict(sorted(entries_by_date.items(), key=lambda x: x[0], reverse=True))
 
-    # Calculate streak
-    streak = calculate_streak(request.user, user_timezone)
+    # Simple streak calculation
+    streak = calculate_streak_simple(request.user)
 
     if request.method == 'POST':
         # Check if it's a delete request
@@ -310,7 +299,6 @@ def journal(request):
         return redirect('journal')
 
     context = {
-        'todays_entries': todays_entries,
         'entries_by_date': entries_by_date,
         'streak': streak,
         'current_date': timezone.now(),
@@ -319,37 +307,22 @@ def journal(request):
     return render(request, 'journal.html', context)
 
 
-def calculate_streak(user, user_timezone):
-    """Calculate the current streak of consecutive days with entries"""
+def calculate_streak_simple(user):
+    """Simple streak calculation using UTC"""
     entries = JournalEntry.objects.filter(user=user).order_by('-created_at')
     if not entries:
         return 0
 
     streak = 0
-    current_date = timezone.now().astimezone(user_timezone).date()
+    current_date = timezone.now().date()
 
-    # Check if there's an entry today
-    has_entry_today = any(
-        entry.created_at.astimezone(user_timezone).date() == current_date
-        for entry in entries
-    )
+    # Check consecutive days with entries
+    for i in range(len(entries)):
+        entry_date = entries[i].created_at.date()
+        days_diff = (current_date - entry_date).days
 
-    if not has_entry_today:
-        return 0
-
-    streak = 1
-    check_date = current_date - timezone.timedelta(days=1)
-
-    # Check consecutive previous days
-    while True:
-        has_entry = any(
-            entry.created_at.astimezone(user_timezone).date() == check_date
-            for entry in entries
-        )
-
-        if has_entry:
+        if days_diff == i:
             streak += 1
-            check_date -= timezone.timedelta(days=1)
         else:
             break
 

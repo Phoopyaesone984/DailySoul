@@ -1,6 +1,5 @@
 {% extends 'base.html' %}
 {% load static %}
-{% load tz %}
 
 {% block title %}Journal | DailySoul{% endblock %}
 
@@ -84,7 +83,7 @@
     align-items: start;
   }
 
-  /* Journal form card */
+  /* Journal form card - increased height since we removed today's section */
   .journal-card {
     background: var(--card-bg);
     border-radius: var(--radius);
@@ -131,7 +130,7 @@
   }
 
   .journal-form textarea {
-    min-height: 300px;
+    min-height: 450px; /* Increased height to use the extra space */
     resize: vertical;
     margin-top: 12px;
     line-height: 1.6;
@@ -180,119 +179,6 @@
     border-color: #ccc;
   }
 
-  /* Today's entries section */
-  .todays-entries {
-    margin-top: 30px;
-    background: var(--card-bg);
-    border-radius: var(--radius);
-    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-    padding: 20px;
-  }
-
-  .todays-entries h4 {
-    margin: 0 0 16px 0;
-    color: var(--accent);
-    font-size: 1.2rem;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .todays-entries-list {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .today-entry-card {
-    background: #f7fcf7;
-    border-radius: 8px;
-    padding: 15px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.03);
-    border-left: 4px solid var(--accent);
-    transition: all 0.2s ease;
-    position: relative;
-  }
-
-  .today-entry-card:hover {
-    background: #f0f7f0;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.08);
-  }
-
-  .today-entry-meta {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 8px;
-  }
-
-  .today-entry-title {
-    font-weight: 600;
-    color: #333;
-    font-size: 1rem;
-    flex: 1;
-  }
-
-  .today-entry-time {
-    color: var(--muted);
-    font-size: 0.8rem;
-    white-space: nowrap;
-  }
-
-  .today-entry-content {
-    color: var(--muted);
-    font-size: 0.9rem;
-    line-height: 1.4;
-  }
-
-  .today-entry-actions {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    display: none;
-    gap: 5px;
-  }
-
-  .today-entry-card:hover .today-entry-actions {
-    display: flex;
-  }
-
-  .entry-action-btn {
-    background: rgba(255,255,255,0.8);
-    border: none;
-    border-radius: 4px;
-    width: 24px;
-    height: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    font-size: 0.8rem;
-    color: var(--muted);
-    transition: all 0.2s ease;
-  }
-
-  .entry-action-btn:hover {
-    background: white;
-    transform: scale(1.1);
-  }
-
-  .view-btn:hover {
-    color: var(--accent);
-  }
-
-  .edit-btn:hover {
-    color: #ffa500;
-  }
-
-  .delete-btn:hover {
-    color: #ff4444;
-    background: rgba(255,68,68,0.1);
-  }
-
   /* Past entries sidebar */
   .sidebar {
     background: var(--card-bg);
@@ -303,7 +189,7 @@
     flex-direction: column;
     gap: 12px;
     height: fit-content;
-    max-height: 600px;
+    max-height: 700px; /* Increased height to match the taller form */
     overflow: hidden;
   }
 
@@ -311,7 +197,7 @@
     display: flex;
     flex-direction: column;
     gap: 12px;
-    max-height: 520px;
+    max-height: 620px; /* Increased to use available space */
     overflow: auto;
     padding-right: 4px;
   }
@@ -399,6 +285,39 @@
 
   .entry-card:hover .entry-actions {
     display: flex;
+  }
+
+  .entry-action-btn {
+    background: rgba(255,255,255,0.8);
+    border: none;
+    border-radius: 4px;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 0.8rem;
+    color: var(--muted);
+    transition: all 0.2s ease;
+  }
+
+  .entry-action-btn:hover {
+    background: white;
+    transform: scale(1.1);
+  }
+
+  .view-btn:hover {
+    color: var(--accent);
+  }
+
+  .edit-btn:hover {
+    color: #ffa500;
+  }
+
+  .delete-btn:hover {
+    color: #ff4444;
+    background: rgba(255,68,68,0.1);
   }
 
   /* Entry Detail Modal */
@@ -621,7 +540,7 @@
     }
 
     .journal-form textarea {
-      min-height: 250px;
+      min-height: 350px;
     }
 
     .sidebar {
@@ -667,11 +586,11 @@
   </div>
 
   <div class="journal-grid">
-    <!-- LEFT: Journal form and today's entries -->
+    <!-- LEFT: Journal form only  -->
     <div>
       <div class="journal-card">
         <div class="section-head">
-          <h3 id="form-title">Add Today's Entry</h3>
+          <h3 id="form-title">Today's Diary </h3>
           <div class="save-indicator">
             <span id="auto-save-status">●</span>
             <span id="save-text">All changes saved</span>
@@ -691,38 +610,12 @@
             <button type="button" class="btn-secondary" id="clear-btn">Clear</button>
             <button type="submit" class="btn-primary" id="submit-btn">
               <span>💾</span>
-              Save Entry
+              Save
             </button>
           </div>
         </form>
       </div>
 
-      <!-- Today's Entries Section -->
-      <div class="todays-entries">
-        <h4>📅 Today's Notes</h4>
-        <div class="todays-entries-list" id="todays-entries-list">
-          {% for entry in todays_entries %}
-            <div class="today-entry-card" data-entry-id="{{ entry.id }}" data-entry-title="{{ entry.title|default:'Untitled' }}" data-entry-content="{{ entry.content }}" data-entry-date="{{ entry.created_at|date:'M d, Y' }}" data-entry-time="{{ entry.created_at|time:'g:i A' }}">
-              <div class="today-entry-meta">
-                <div class="today-entry-title">{{ entry.title|default:"Untitled" }}</div>
-                <div class="today-entry-time">{{ entry.created_at|time:'g:i A' }}</div>
-              </div>
-              <div class="today-entry-content">{{ entry.content|truncatechars:140 }}</div>
-              <div class="today-entry-actions">
-                <button class="entry-action-btn view-btn" title="View">👁️</button>
-                <button class="entry-action-btn edit-btn" title="Edit">✏️</button>
-                <button class="entry-action-btn delete-btn" title="Delete">🗑️</button>
-              </div>
-            </div>
-          {% empty %}
-            <div class="no-entries">
-              <div class="icon">📝</div>
-              <p>No entries for today yet</p>
-              <p style="font-size: 0.9rem; margin-top: 8px;">Write your first entry above!</p>
-            </div>
-          {% endfor %}
-        </div>
-      </div>
     </div>
 
     <!-- RIGHT: Past entries grouped by day -->
@@ -801,7 +694,7 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-    const entryCards = document.querySelectorAll('.entry-card, .today-entry-card');
+    const entryCards = document.querySelectorAll('.entry-card');
     const entryModal = document.getElementById('entry-modal');
     const deleteModal = document.getElementById('delete-modal');
     const closeModal = document.getElementById('close-modal');
