@@ -244,7 +244,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
 from collections import OrderedDict
-from .models import JournalEntry
+from .models import JournalEntry,DeathNoteEntry
 
 
 @login_required
@@ -327,3 +327,25 @@ def calculate_streak_simple(user):
             break
 
     return streak
+
+
+@login_required
+def deathnote(request):
+    user = request.user
+
+    # Handle writing
+    if request.method == 'POST':
+        content = request.POST.get('content')
+        if content.strip():
+            DeathNoteEntry.objects.create(user=user, content=content)
+        return redirect('death_note')
+
+    # Handle delete
+    if request.GET.get('delete'):
+        note_id = request.GET.get('delete')
+        DeathNoteEntry.objects.filter(id=note_id, user=user).delete()
+        return redirect('death_note')
+
+    notes = DeathNoteEntry.objects.filter(user=user).order_by('-created_at')
+
+    return render(request, 'death_note.html', {'notes': notes})
