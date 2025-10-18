@@ -329,23 +329,107 @@ def calculate_streak_simple(user):
     return streak
 
 
+# views.py
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from .models import DeathNoteEntry
+
+
+@login_required
+def death_note(request):
+    # Handle POST request first (form submission)
+    if request.method == 'POST':
+        content = request.POST.get('content', '').strip()
+        mood = request.POST.get('mood', '').strip()
+
+        print(f"DEBUG: Form submitted - User: {request.user}, Content: {content}")  # Debug
+
+        if content:
+            try:
+                DeathNoteEntry.objects.create(
+                    user=request.user,
+                    content=content,
+                    mood=mood if mood else None
+                )
+                messages.success(request, 'Negative thought captured in Death Note!')
+                print(f"DEBUG: Successfully created entry for user {request.user}")  # Debug
+            except Exception as e:
+                messages.error(request, f'Error saving thought: {str(e)}')
+                print(f"DEBUG: Error creating entry: {e}")  # Debug
+        else:
+            messages.error(request, 'Please write something before submitting.')
+
+        return redirect('death_note')
+
+    # Handle GET request (viewing page or deleting)
+    delete_id = request.GET.get('delete')
+    if delete_id:
+        try:
+            entry = DeathNoteEntry.objects.get(id=delete_id, user=request.user)
+            entry.delete()
+            messages.success(request, 'Thought released successfully!')
+            print(f"DEBUG: Successfully deleted entry {delete_id}")  # Debug
+            return redirect('death_note')
+        except DeathNoteEntry.DoesNotExist:
+            messages.error(request, 'Thought not found.')
+        except Exception as e:
+            messages.error(request, f'Error deleting thought: {str(e)}')
+
+    # Get all notes for the current user
+    notes = DeathNoteEntry.objects.filter(user=request.user).order_by('-created_at')
+    print(f"DEBUG: Found {notes.count()} notes for user {request.user}")  # Debug
+
+    context = {
+        'notes': notes
+    }
+    return render(request, 'death_note.html', context)# views.py
+
+
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from .models import DeathNoteEntry
+
+
 @login_required
 def deathnote(request):
-    user = request.user
-
-    # Handle writing
+    # Handle POST request first (form submission)
     if request.method == 'POST':
-        content = request.POST.get('content')
-        if content.strip():
-            DeathNoteEntry.objects.create(user=user, content=content)
+        content = request.POST.get('content', '').strip()
+
+
+        if content:
+            try:
+                DeathNoteEntry.objects.create(
+                    user=request.user,
+                    content=content,
+
+                )
+                messages.success(request, 'Negative thought captured in Death Note!')
+
+            except Exception as e:
+                messages.error(request, f'Error saving thought: {str(e)}')
+        else:
+            messages.error(request, 'Please write something before submitting.')
+
         return redirect('death_note')
 
-    # Handle delete
-    if request.GET.get('delete'):
-        note_id = request.GET.get('delete')
-        DeathNoteEntry.objects.filter(id=note_id, user=user).delete()
-        return redirect('death_note')
+    # Handle GET request (viewing page or deleting)
+    delete_id = request.GET.get('delete')
+    if delete_id:
+        try:
+            entry = DeathNoteEntry.objects.get(id=delete_id, user=request.user)
+            entry.delete()
+            messages.success(request, 'Thought released successfully!')
+            return redirect('death_note')
+        except DeathNoteEntry.DoesNotExist:
+            messages.error(request, 'Thought not found.')
 
-    notes = DeathNoteEntry.objects.filter(user=user).order_by('-created_at')
+    # Get all notes for the current user
+    notes = DeathNoteEntry.objects.filter(user=request.user).order_by('-created_at')
 
-    return render(request, 'death_note.html', {'notes': notes})
+    context = {
+        'notes': notes
+    }
+    return render(request, 'death_note.html', context)
