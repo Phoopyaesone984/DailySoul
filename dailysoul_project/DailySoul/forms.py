@@ -14,7 +14,7 @@ class RegisterForm(UserCreationForm):
         })
     )
     email = forms.EmailField(
-        required=False,
+        required=True,
         widget=forms.EmailInput(attrs={
             "placeholder": "you@example.com (optional)",
             "class": "input",

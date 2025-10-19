@@ -192,6 +192,8 @@
     .aff-text { position:relative; z-index:1; font-style: italic; font-size:0.95rem; }
     .aff-cat { font-size:0.8rem; color:var(--muted-light); margin-top:6px; text-transform:capitalize; }
 
+
+
     .welcome-message {
       background: var(--card-bg);
       color: var(--muted);
@@ -300,33 +302,35 @@
       </div>
 
       <ul class="affirmation-list" id="affirmationList">
-        {% if affirmations %}
-          {% for a in affirmations %}
-            <li class="aff-card">
-              <div class="aff-image-wrap">
-                {% if a.image %}
-                  <img src="{{ a.image.url }}" alt="{{ a.category|default:'Affirmation' }}" class="aff-image" loading="lazy">
-                {% else %}
-                  <img src="{% static 'images/affirmation-thumb.jpg' %}" alt="Affirmation" class="aff-image" loading="lazy">
-                {% endif %}
-              </div>
-              <div style="flex:1;">
-                <div class="aff-text">{{ a.text }}</div>
-                {% if a.category %}
-                  <div class="aff-cat">{{ a.category }}</div>
-                {% endif %}
-              </div>
-            </li>
-          {% endfor %}
-        {% else %}
-          <li class="aff-card">
-            <div class="aff-image-wrap">
-              <img src="{% static 'images/affirmation-thumb.jpg' %}" alt="Affirmation" class="aff-image" loading="lazy">
-            </div>
-            <div class="aff-text">Loading your daily affirmations…</div>
-          </li>
-        {% endif %}
-      </ul>
+  {% if affirmations %}
+    {% for a in affirmations %}
+      <li class="aff-card">
+        <div class="aff-image-wrap">
+          {% if a.image %}
+            <img src="{{ a.image.url }}" alt="{{ a.category|default:'Affirmation' }}" class="aff-image" loading="lazy">
+          {% else %}
+            <img src="{% static 'images/affirmation-thumb.jpg' %}" alt="Affirmation" class="aff-image" loading="lazy">
+          {% endif %}
+        </div>
+        <div style="flex:1;">
+          <div class="aff-text" id="affText{{ forloop.counter }}">{{ a.text }}</div>
+          {% if a.category %}
+            <div class="aff-cat">{{ a.category }}</div>
+          {% endif %}
+          <button class="read-aloud-btn" data-target="affText{{ forloop.counter }}"> ▶️ Read Aloud</button>
+        </div>
+      </li>
+    {% endfor %}
+  {% else %}
+    <li class="aff-card">
+      <div class="aff-image-wrap">
+        <img src="{% static 'images/affirmation-thumb.jpg' %}" alt="Affirmation" class="aff-image" loading="lazy">
+      </div>
+      <div class="aff-text">Loading your daily affirmations…</div>
+    </li>
+  {% endif %}
+</ul>
+
     </div>
 
   </div>
@@ -519,6 +523,33 @@
       })();
 
     })();
+
+
+  (function() {
+    const readBtns = document.querySelectorAll('.read-aloud-btn');
+
+    readBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const targetId = btn.dataset.target;
+        const textEl = document.getElementById(targetId);
+        if (!textEl) return;
+
+        const utterance = new SpeechSynthesisUtterance(textEl.textContent);
+        utterance.lang = 'en-US'; // you can customize the language
+        utterance.rate = 1; // normal speed
+        utterance.pitch = 1; // normal pitch
+        utterance.volume = 1;
+
+        // Stop any existing speech
+        window.speechSynthesis.cancel();
+
+        // Speak the text
+        window.speechSynthesis.speak(utterance);
+      });
+    });
+  })();
+
+
   </script>
 {% endblock %}
 </body>

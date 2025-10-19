@@ -12,4 +12,5 @@ urlpatterns = [
     path('api/get-piles/', views.api_get_piles, name='api_get_piles'),
     path('journal/', views.journal, name='journal'),
     path('deathnote/', views.deathnote, name='death_note'),
+    path('mini_games/', views.mini_games, name='mini_games'),
 ]

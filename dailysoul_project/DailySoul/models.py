@@ -2,6 +2,9 @@ from django.utils import timezone
 from django.db import models
 from django.contrib.auth.models import User
 
+User._meta.get_field('email')._unique = True
+
+
 class Affirmation(models.Model):
     text = models.TextField()
     category = models.CharField(max_length=100, blank=True, null=True)

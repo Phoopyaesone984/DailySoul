@@ -1,59 +1,96 @@
-from django.shortcuts import render, redirect
-from django.http import JsonResponse
-from .models import Affirmation, LuckCard, DailyAffirmation
-import random
+from .models import Affirmation, LuckCard, DailyAffirmation,DeathNoteEntry,JournalEntry
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.contrib.auth.models import User
+from django.db import IntegrityError
+from .forms import RegisterForm
+from django.contrib.auth import login
+from django.contrib.auth.forms import AuthenticationForm
+from django.db import transaction
+from django.http import JsonResponse
+from django.templatetags.static import static
+from .models import LuckCard, DailyPileDraw, PileCardSelection
+import random
+from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
+from django.contrib.auth.decorators import login_required
+from collections import OrderedDict
 
 
-# 🌿 Home Page
+
+
 def home(request):
     return render(request, 'home.html')
 
 
-# 🌸 Register
 def register_view(request):
     if request.method == 'POST':
-        username = request.POST.get('username')
-        email = request.POST.get('email')
-        password1 = request.POST.get('password1')
-        password2 = request.POST.get('password2')
-
-        if password1 != password2:
-            messages.error(request, "Passwords do not match.")
-            return redirect('register')
-
-        if User.objects.filter(username=username).exists():
-            messages.error(request, "Username already exists.")
-            return redirect('register')
-
-        user = User.objects.create_user(username=username, email=email, password=password1)
-        user.save()
-        messages.success(request, "Account created successfully! Please log in.")
-        return redirect('login')
-
-    return render(request, 'register.html')
+        form = RegisterForm(request.POST)
+        if form.is_valid():
+            try:
+                # Save user
+                user = form.save(commit=False)
+                # normalize email
+                user.email = form.cleaned_data.get('email').strip().lower()
+                user.save()
+                messages.success(request, "Account created successfully! You can now log in.")
+                return redirect('login')
+            except IntegrityError:
+                # This should be rare due to form validation, but handle DB constraint race
+                messages.error(request, "Email already exists")
+                return render(request, 'register.html', {'form': form})
+        else:
+            # form invalid — show errors inline
+            return render(request, 'register.html', {'form': form})
+    else:
+        form = RegisterForm()
+    return render(request, 'register.html', {'form': form})
 
 
 # 🌼 Login
+
 def login_view(request):
-    if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
+    """
+    Login view using Django's AuthenticationForm.
+    We set widget attrs in the view so the template doesn't need widget-tweaks.
+    """
+    if request.method == "POST":
+        form = AuthenticationForm(request, data=request.POST)
+        # Always attach styling attributes so the template renders nicely
+        form.fields['username'].widget.attrs.update({
+            'class': 'input',
+            'placeholder': 'Username or email',
+            'autocomplete': 'username'
+        })
+        form.fields['password'].widget.attrs.update({
+            'class': 'input',
+            'placeholder': 'Password',
+            'autocomplete': 'current-password'
+        })
 
-        user = authenticate(request, username=username, password=password)
-
-        if user is not None:
+        if form.is_valid():
+            user = form.get_user()
             login(request, user)
-            messages.success(request, f"Welcome back, {username} 🌿")
+            messages.success(request, f"Welcome back, {user.username} 🌿")
             return redirect('dashboard')
         else:
-            messages.error(request, "Invalid username or password.")
+            # Let template show form errors; also add a friendly message
+            messages.error(request, "Login failed — please check your credentials.")
+    else:
+        form = AuthenticationForm()
+        # Attach same widget attrs for GET
+        form.fields['username'].widget.attrs.update({
+            'class': 'input',
+            'placeholder': 'Username or email',
+            'autocomplete': 'username'
+        })
+        form.fields['password'].widget.attrs.update({
+            'class': 'input',
+            'placeholder': 'Password',
+            'autocomplete': 'current-password'
+        })
 
-    return render(request, 'login.html')
-
+    return render(request, 'login.html', {'form': form})
 
 # 🍃 Logout
 def logout_view(request):
@@ -105,13 +142,6 @@ def dashboard(request):
         'affirmations': affirmations
     })
 
-# views.py (add or replace api_get_piles)
-from django.db import transaction
-from django.http import JsonResponse
-from django.utils import timezone
-from django.templatetags.static import static
-from .models import LuckCard, DailyPileDraw, PileCardSelection
-import random
 
 MAX_DRAWS_PER_DAY = 3
 
@@ -239,14 +269,6 @@ def api_get_piles(request):
         return JsonResponse({'error': str(exc)}, status=500)
 
 
-from django.contrib import messages
-from django.shortcuts import render, redirect, get_object_or_404
-from django.utils import timezone
-from django.contrib.auth.decorators import login_required
-from collections import OrderedDict
-from .models import JournalEntry,DeathNoteEntry
-
-
 @login_required
 def journal(request):
     # Get all entries grouped by date
@@ -329,13 +351,6 @@ def calculate_streak_simple(user):
     return streak
 
 
-# views.py
-from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from .models import DeathNoteEntry
-
-
 @login_required
 def death_note(request):
     # Handle POST request first (form submission)
@@ -362,7 +377,6 @@ def death_note(request):
 
         return redirect('death_note')
 
-    # Handle GET request (viewing page or deleting)
     delete_id = request.GET.get('delete')
     if delete_id:
         try:
@@ -384,12 +398,6 @@ def death_note(request):
         'notes': notes
     }
     return render(request, 'death_note.html', context)# views.py
-
-
-from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from .models import DeathNoteEntry
 
 
 @login_required
@@ -433,3 +441,14 @@ def deathnote(request):
         'notes': notes
     }
     return render(request, 'death_note.html', context)
+
+from django.shortcuts import render
+
+def mini_games(request):
+    # You can pass data for mini-games if needed later
+    games = [
+        {"id": "memory", "title": "Card Match", "desc": "Match pairs of positive affirmations", "icon": "🃏"},
+        {"id": "bubble", "title": "Bubble Pop", "desc": "Pop negative thought bubbles", "icon": "💭"},
+        {"id": "zen", "title": "Zen Garden", "desc": "Arrange stones and plants to relax", "icon": "🌿"},
+    ]
+    return render(request, 'mini_games.html', {"games": games})
