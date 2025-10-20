@@ -1,0 +1,520 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Bubble Pop Game - DailySoul{% endblock %}
+
+{% block content %}
+<div class="game-container">
+    <div class="game-header">
+        <h1>Bubble Pop Game</h1>
+        <div class="game-stats">
+            <div class="stat">
+                <span class="stat-label">Score:</span>
+                <span id="score" class="stat-value">0</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">Time:</span>
+                <span id="timer" class="stat-value">60</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">Bubbles:</span>
+                <span id="bubblesPopped" class="stat-value">0</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="game-controls">
+        <button id="startBtn" class="btn btn-primary">Start Game</button>
+        <button id="pauseBtn" class="btn btn-secondary" disabled>Pause</button>
+        <button id="resetBtn" class="btn btn-warning">Reset</button>
+    </div>
+
+    <div class="game-area" id="gameArea">
+        <div class="game-instructions">
+            <h3>How to Play:</h3>
+            <p>Click on bubbles to pop them! Different colors give different points:</p>
+            <ul>
+                <li><span class="color-dot red"></span> Red: 10 points</li>
+                <li><span class="color-dot blue"></span> Blue: 20 points</li>
+                <li><span class="color-dot green"></span> Green: 30 points</li>
+                <li><span class="color-dot gold"></span> Gold: 50 points</li>
+            </ul>
+            <p>Pop as many as you can in 60 seconds!</p>
+        </div>
+    </div>
+
+    <div class="game-footer">
+        <div class="high-scores">
+            <h3>High Scores</h3>
+            <div id="highScoresList"></div>
+        </div>
+    </div>
+</div>
+
+<style>
+.game-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    color: white;
+}
+
+.game-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.game-header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 15px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+}
+
+.game-stats {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin-bottom: 20px;
+}
+
+.stat {
+    background: rgba(255,255,255,0.1);
+    padding: 15px 25px;
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
+.stat-label {
+    display: block;
+    font-size: 0.9rem;
+    opacity: 0.8;
+    margin-bottom: 5px;
+}
+
+.stat-value {
+    display: block;
+    font-size: 1.8rem;
+    font-weight: bold;
+}
+
+.game-controls {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.btn {
+    padding: 12px 25px;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.btn-primary {
+    background: linear-gradient(45deg, #77bfa3, #5fa88d);
+    color: white;
+}
+
+.btn-secondary {
+    background: linear-gradient(45deg, #6c757d, #5a6268);
+    color: white;
+}
+
+.btn-warning {
+    background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+    color: white;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.game-area {
+    position: relative;
+    width: 100%;
+    height: 500px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 15px;
+    border: 2px solid rgba(255,255,255,0.1);
+    overflow: hidden;
+    margin-bottom: 25px;
+}
+
+.game-instructions {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    background: rgba(0,0,0,0.7);
+    padding: 30px;
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+    z-index: 10;
+}
+
+.bubble {
+    position: absolute;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: transform 0.1s ease;
+    box-shadow:
+        inset -5px -5px 10px rgba(0,0,0,0.2),
+        inset 5px 5px 10px rgba(255,255,255,0.1),
+        0 5px 15px rgba(0,0,0,0.3);
+    background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.8), rgba(255,255,255,0.2));
+}
+
+.bubble:hover {
+    transform: scale(1.1);
+}
+
+.bubble.popping {
+    animation: pop 0.3s ease-out forwards;
+}
+
+@keyframes pop {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.3); opacity: 0.7; }
+    100% { transform: scale(0); opacity: 0; }
+}
+
+.high-scores {
+    text-align: center;
+}
+
+#highScoresList {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.high-score-item {
+    background: rgba(255,255,255,0.1);
+    padding: 10px 20px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
+.game-over {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0,0,0,0.9);
+    padding: 40px;
+    border-radius: 20px;
+    text-align: center;
+    z-index: 100;
+    border: 2px solid #77bfa3;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .game-stats { flex-direction: column; gap: 10px; }
+    .game-area { height: 400px; }
+}
+</style>
+
+<script>
+class BubblePopGame {
+    constructor() {
+        this.score = 0;
+        this.timeLeft = 60;
+        this.bubblesPopped = 0;
+        this.gameActive = false;
+        this.timer = null;
+        this.bubbleInterval = null;
+
+        this.gameArea = document.getElementById('gameArea');
+        this.scoreElement = document.getElementById('score');
+        this.timerElement = document.getElementById('timer');
+        this.bubblesPoppedElement = document.getElementById('bubblesPopped');
+        this.startBtn = document.getElementById('startBtn');
+        this.pauseBtn = document.getElementById('pauseBtn');
+        this.resetBtn = document.getElementById('resetBtn');
+        this.highScoresList = document.getElementById('highScoresList');
+
+        this.initializeEventListeners();
+        this.loadHighScores();
+    }
+
+    initializeEventListeners() {
+        this.startBtn.addEventListener('click', () => this.startGame());
+        this.pauseBtn.addEventListener('click', () => this.pauseGame());
+        this.resetBtn.addEventListener('click', () => this.resetGame());
+    }
+
+    startGame() {
+        if (!this.gameActive) {
+            this.gameActive = true;
+            this.startBtn.disabled = true;
+            this.pauseBtn.disabled = false;
+
+            const instructions = this.gameArea.querySelector('.game-instructions');
+            if (instructions) instructions.remove();
+
+            this.timer = setInterval(() => {
+                this.timeLeft--;
+                this.timerElement.textContent = this.timeLeft;
+                if (this.timeLeft <= 0) this.endGame();
+            }, 1000);
+
+            this.bubbleInterval = setInterval(() => this.createBubble(), 800);
+            for (let i = 0; i < 5; i++) this.createBubble();
+        }
+    }
+
+    pauseGame() {
+        if (this.gameActive) {
+            this.gameActive = false;
+            this.startBtn.disabled = false;
+            this.pauseBtn.disabled = true;
+            this.startBtn.textContent = 'Resume';
+            clearInterval(this.timer);
+            clearInterval(this.bubbleInterval);
+        }
+    }
+
+    resetGame() {
+        this.pauseGame();
+        this.score = 0;
+        this.timeLeft = 60;
+        this.bubblesPopped = 0;
+        this.startBtn.textContent = 'Start Game';
+        this.updateDisplay();
+        this.clearBubbles();
+
+        const gameOver = this.gameArea.querySelector('.game-over');
+        if (gameOver) gameOver.remove();
+
+        if (!this.gameArea.querySelector('.game-instructions')) {
+            this.addInstructions();
+        }
+    }
+
+    addInstructions() {
+        const instructions = document.createElement('div');
+        instructions.className = 'game-instructions';
+        instructions.innerHTML = `
+            <h3>How to Play:</h3>
+            <p>Click on bubbles to pop them! Different colors give different points:</p>
+            <ul>
+                <li><span class="color-dot red"></span> Red: 10 points</li>
+                <li><span class="color-dot blue"></span> Blue: 20 points</li>
+                <li><span class="color-dot green"></span> Green: 30 points</li>
+                <li><span class="color-dot gold"></span> Gold: 50 points</li>
+            </ul>
+            <p>Pop as many as you can in 60 seconds!</p>
+        `;
+        this.gameArea.appendChild(instructions);
+    }
+
+    createBubble() {
+        if (!this.gameActive) return;
+
+        const bubble = document.createElement('div');
+        bubble.className = 'bubble';
+
+        const size = Math.random() * 40 + 30;
+        bubble.style.width = `${size}px`;
+        bubble.style.height = `${size}px`;
+
+        const maxX = this.gameArea.offsetWidth - size;
+        const maxY = this.gameArea.offsetHeight - size;
+        bubble.style.left = `${Math.random() * maxX}px`;
+        bubble.style.top = `${Math.random() * maxY}px`;
+
+        const colors = [
+            { color: '#ff6b6b', points: 10 },
+            { color: '#4ecdc4', points: 20 },
+            { color: '#77bfa3', points: 30 },
+            { color: '#ffd93d', points: 50 }
+        ];
+
+        const colorConfig = colors[Math.floor(Math.random() * colors.length)];
+        bubble.style.background = `radial-gradient(circle at 30% 30%, ${this.lightenColor(colorConfig.color, 40)}, ${colorConfig.color})`;
+        bubble.dataset.points = colorConfig.points;
+
+        bubble.addEventListener('click', () => this.popBubble(bubble));
+        this.gameArea.appendChild(bubble);
+
+        setTimeout(() => bubble.remove(), 4000);
+    }
+
+    lightenColor(color, percent) {
+        const num = parseInt(color.replace("#", ""), 16);
+        const amt = Math.round(2.55 * percent);
+        const R = (num >> 16) + amt;
+        const G = (num >> 8 & 0x00FF) + amt;
+        const B = (num & 0x0000FF) + amt;
+        return "#" + (
+            0x1000000 +
+            (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 +
+            (G < 255 ? G < 1 ? 0 : G : 255) * 0x100 +
+            (B < 255 ? B < 1 ? 0 : B : 255)
+        ).toString(16).slice(1);
+    }
+
+    popBubble(bubble) {
+        if (!this.gameActive) return;
+
+        const points = parseInt(bubble.dataset.points);
+        this.score += points;
+        this.bubblesPopped++;
+
+        bubble.classList.add('popping');
+        bubble.style.pointerEvents = 'none';
+        this.showPointsAnimation(bubble, points);
+        this.updateDisplay();
+
+        setTimeout(() => bubble.remove(), 300);
+    }
+
+    showPointsAnimation(bubble, points) {
+        const pointsElement = document.createElement('div');
+        pointsElement.textContent = `+${points}`;
+        pointsElement.style.position = 'absolute';
+        pointsElement.style.left = bubble.style.left;
+        pointsElement.style.top = bubble.style.top;
+        pointsElement.style.color = '#ffd93d';
+        pointsElement.style.fontWeight = 'bold';
+        pointsElement.style.fontSize = '1.2rem';
+        pointsElement.style.pointerEvents = 'none';
+        pointsElement.style.zIndex = '100';
+        pointsElement.style.textShadow = '2px 2px 4px rgba(0,0,0,0.5)';
+        pointsElement.style.animation = 'floatUp 1s ease-out forwards';
+
+        if (!document.querySelector('#pointsAnimation')) {
+            const style = document.createElement('style');
+            style.id = 'pointsAnimation';
+            style.textContent = `
+                @keyframes floatUp {
+                    0% { transform: translateY(0); opacity: 1; }
+                    100% { transform: translateY(-50px); opacity: 0; }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        this.gameArea.appendChild(pointsElement);
+        setTimeout(() => pointsElement.remove(), 1000);
+    }
+
+    updateDisplay() {
+        this.scoreElement.textContent = this.score;
+        this.timerElement.textContent = this.timeLeft;
+        this.bubblesPoppedElement.textContent = this.bubblesPopped;
+    }
+
+    clearBubbles() {
+        this.gameArea.querySelectorAll('.bubble').forEach(bubble => bubble.remove());
+    }
+
+    endGame() {
+        this.gameActive = false;
+        clearInterval(this.timer);
+        clearInterval(this.bubbleInterval);
+
+        this.startBtn.disabled = false;
+        this.pauseBtn.disabled = true;
+        this.startBtn.textContent = 'Play Again';
+
+        this.clearBubbles();
+        this.showGameOver();
+        this.saveScore();
+        this.loadHighScores();
+    }
+
+    showGameOver() {
+        const gameOver = document.createElement('div');
+        gameOver.className = 'game-over';
+        gameOver.innerHTML = `
+            <h2>Game Over!</h2>
+            <div style="font-size: 3rem; color: #ffd93d; margin: 20px 0;">${this.score} Points</div>
+            <p>You popped ${this.bubblesPopped} bubbles!</p>
+            <button class="btn btn-primary" onclick="game.resetGame()">Play Again</button>
+        `;
+        this.gameArea.appendChild(gameOver);
+    }
+
+    async saveScore() {
+        try {
+            const response = await fetch('{% url "save_bubble_score" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': this.getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    score: this.score,
+                    bubbles_popped: this.bubblesPopped
+                })
+            });
+            await response.json();
+        } catch (error) {
+            console.error('Error saving score:', error);
+        }
+    }
+
+    async loadHighScores() {
+        try {
+            const response = await fetch('{% url "get_bubble_high_scores" %}');
+            const data = await response.json();
+
+            this.highScoresList.innerHTML = '';
+            data.high_scores.forEach((score, index) => {
+                const scoreElement = document.createElement('div');
+                scoreElement.className = 'high-score-item';
+                scoreElement.innerHTML = `
+                    <div>${index + 1}. ${score.player}</div>
+                    <div style="color: #ffd93d; font-weight: bold;">${score.score}</div>
+                `;
+                this.highScoresList.appendChild(scoreElement);
+            });
+        } catch (error) {
+            console.error('Error loading high scores:', error);
+        }
+    }
+
+    getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+}
+
+// Initialize game
+let game;
+document.addEventListener('DOMContentLoaded', () => {
+    game = new BubblePopGame();
+});
+</script>
+{% endblock %}

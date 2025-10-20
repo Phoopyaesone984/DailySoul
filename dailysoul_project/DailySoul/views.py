@@ -452,3 +452,54 @@ def mini_games(request):
         {"id": "zen", "title": "Zen Garden", "desc": "Arrange stones and plants to relax", "icon": "🌿"},
     ]
     return render(request, 'mini_games.html', {"games": games})
+
+
+from django.shortcuts import render
+from django.http import JsonResponse
+import json
+from django.views.decorators.csrf import csrf_exempt
+
+
+# ... your existing views ...
+
+def bubble_pop_game(request):
+    """Bubble Pop Game view"""
+    return render(request, 'bubble_pop.html')
+
+
+@csrf_exempt
+def save_bubble_score(request):
+    """Save bubble pop game score"""
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            score = data.get('score', 0)
+            bubbles_popped = data.get('bubbles_popped', 0)
+
+            # Here you can save to database if you want
+            # For example, if you have a GameScore model:
+            # GameScore.objects.create(user=request.user, game='bubble_pop', score=score)
+
+            return JsonResponse({
+                'status': 'success',
+                'score': score,
+                'bubbles_popped': bubbles_popped,
+                'message': 'Score recorded!'
+            })
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})
+
+    return JsonResponse({'status': 'error', 'message': 'Invalid request'})
+
+
+def get_bubble_high_scores(request):
+    """Get bubble pop high scores"""
+    # Mock data - replace with actual database query if you have a scores model
+    high_scores = [
+        {'player': 'Player1', 'score': 1500},
+        {'player': 'Player2', 'score': 1200},
+        {'player': 'Player3', 'score': 900},
+        {'player': 'Player4', 'score': 800},
+        {'player': 'Player5', 'score': 750},
+    ]
+    return JsonResponse({'high_scores': high_scores})
