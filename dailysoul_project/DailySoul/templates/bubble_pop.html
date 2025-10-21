@@ -44,9 +44,20 @@
     </div>
 
     <div class="game-footer">
-        <div class="high-scores">
-            <h3>High Scores</h3>
-            <div id="highScoresList"></div>
+        <div class="high-scores-section">
+            <div class="current-player-score">
+                <h3>Your Best Score</h3>
+                <div id="currentPlayerScore" class="player-score-display">
+                    <div class="score-placeholder">Play a game to see your score!</div>
+                </div>
+            </div>
+
+            <div class="high-scores">
+                <h3>🏆 High Scores</h3>
+                <div id="highScoresList" class="high-scores-list">
+                    <!-- Scores will be loaded here -->
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -170,6 +181,20 @@
     z-index: 10;
 }
 
+.color-dot {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid white;
+    margin-right: 8px;
+}
+
+.color-dot.red { background: #ff6b6b; }
+.color-dot.blue { background: #4ecdc4; }
+.color-dot.green { background: #77bfa3; }
+.color-dot.gold { background: #ffd93d; }
+
 .bubble {
     position: absolute;
     border-radius: 50%;
@@ -196,22 +221,101 @@
     100% { transform: scale(0); opacity: 0; }
 }
 
-.high-scores {
-    text-align: center;
+/* High Scores Section */
+.high-scores-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin-top: 20px;
 }
 
-#highScoresList {
+.current-player-score, .high-scores {
+    background: rgba(255,255,255,0.1);
+    padding: 20px;
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
+.current-player-score h3, .high-scores h3 {
+    text-align: center;
+    margin-bottom: 15px;
+    color: #ffd93d;
+    font-size: 1.3rem;
+}
+
+.player-score-display {
+    text-align: center;
+    padding: 15px;
+}
+
+.current-score {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #77bfa3;
+    margin-bottom: 5px;
+}
+
+.current-player {
+    font-size: 1.1rem;
+    opacity: 0.9;
+}
+
+.score-placeholder {
+    font-style: italic;
+    opacity: 0.7;
+}
+
+.high-scores-list {
     display: flex;
-    justify-content: center;
-    gap: 15px;
-    flex-wrap: wrap;
+    flex-direction: column;
+    gap: 10px;
 }
 
 .high-score-item {
-    background: rgba(255,255,255,0.1);
-    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    background: rgba(255,255,255,0.05);
     border-radius: 10px;
-    border: 1px solid rgba(255,255,255,0.2);
+    border: 1px solid rgba(255,255,255,0.1);
+    transition: all 0.3s ease;
+}
+
+.high-score-item:hover {
+    background: rgba(255,255,255,0.1);
+    transform: translateX(5px);
+}
+
+.high-score-item.current-user {
+    background: rgba(119, 191, 163, 0.3);
+    border: 2px solid #77bfa3;
+    font-weight: bold;
+}
+
+.rank {
+    font-weight: bold;
+    color: #ffd93d;
+    min-width: 30px;
+}
+
+.player-name {
+    flex: 1;
+    text-align: left;
+    margin-left: 10px;
+}
+
+.player-name.current-user {
+    color: #77bfa3;
+    font-weight: bold;
+}
+
+.score-value {
+    font-weight: bold;
+    color: #ffd93d;
+    min-width: 60px;
+    text-align: right;
 }
 
 .game-over {
@@ -225,12 +329,51 @@
     text-align: center;
     z-index: 100;
     border: 2px solid #77bfa3;
+    backdrop-filter: blur(10px);
+}
+
+.final-score {
+    font-size: 3rem;
+    color: #ffd93d;
+    margin: 20px 0;
+    font-weight: bold;
+}
+
+.final-rank {
+    font-size: 1.2rem;
+    color: #77bfa3;
+    margin-bottom: 20px;
 }
 
 /* Responsive */
 @media (max-width: 768px) {
-    .game-stats { flex-direction: column; gap: 10px; }
+    .game-stats {
+        flex-direction: column;
+        gap: 10px;
+        align-items: center;
+    }
     .game-area { height: 400px; }
+    .stat {
+        width: 200px;
+    }
+    .game-controls {
+        flex-wrap: wrap;
+    }
+    .high-scores-section {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .high-score-item {
+        padding: 10px 12px;
+        font-size: 0.9rem;
+    }
+
+    .current-score {
+        font-size: 1.5rem;
+    }
 }
 </style>
 
@@ -243,6 +386,8 @@ class BubblePopGame {
         this.gameActive = false;
         this.timer = null;
         this.bubbleInterval = null;
+        this.currentPlayerName = "{{ user.username|default:'Guest' }}";
+        this.currentSessionScore = 0;
 
         this.gameArea = document.getElementById('gameArea');
         this.scoreElement = document.getElementById('score');
@@ -252,6 +397,7 @@ class BubblePopGame {
         this.pauseBtn = document.getElementById('pauseBtn');
         this.resetBtn = document.getElementById('resetBtn');
         this.highScoresList = document.getElementById('highScoresList');
+        this.currentPlayerScore = document.getElementById('currentPlayerScore');
 
         this.initializeEventListeners();
         this.loadHighScores();
@@ -438,22 +584,49 @@ class BubblePopGame {
         this.pauseBtn.disabled = true;
         this.startBtn.textContent = 'Play Again';
 
+        this.currentSessionScore = this.score;
         this.clearBubbles();
         this.showGameOver();
         this.saveScore();
+        this.updateCurrentPlayerScore();
         this.loadHighScores();
     }
 
     showGameOver() {
         const gameOver = document.createElement('div');
         gameOver.className = 'game-over';
+
+        const rank = this.calculateRank(this.score);
+
         gameOver.innerHTML = `
             <h2>Game Over!</h2>
-            <div style="font-size: 3rem; color: #ffd93d; margin: 20px 0;">${this.score} Points</div>
+            <div class="final-score">${this.score} Points</div>
+            <div class="final-rank">You achieved ${this.getRankText(rank)} place!</div>
             <p>You popped ${this.bubblesPopped} bubbles!</p>
             <button class="btn btn-primary" onclick="game.resetGame()">Play Again</button>
         `;
         this.gameArea.appendChild(gameOver);
+    }
+
+    calculateRank(score) {
+        if (score >= 1500) return 1;
+        if (score >= 1200) return 2;
+        if (score >= 900) return 3;
+        if (score >= 600) return 4;
+        if (score >= 300) return 5;
+        return 6;
+    }
+
+    getRankText(rank) {
+        const ranks = {1: "1st", 2: "2nd", 3: "3rd", 4: "4th", 5: "5th"};
+        return ranks[rank] || `${rank}th`;
+    }
+
+    updateCurrentPlayerScore() {
+        this.currentPlayerScore.innerHTML = `
+            <div class="current-score">${this.currentSessionScore}</div>
+            <div class="current-player">${this.currentPlayerName}</div>
+        `;
     }
 
     async saveScore() {
@@ -466,10 +639,15 @@ class BubblePopGame {
                 },
                 body: JSON.stringify({
                     score: this.score,
-                    bubbles_popped: this.bubblesPopped
+                    bubbles_popped: this.bubblesPopped,
+                    player_name: this.currentPlayerName
                 })
             });
-            await response.json();
+
+            const data = await response.json();
+            if (data.status === 'success') {
+                console.log('Score saved successfully:', data);
+            }
         } catch (error) {
             console.error('Error saving score:', error);
         }
@@ -481,17 +659,52 @@ class BubblePopGame {
             const data = await response.json();
 
             this.highScoresList.innerHTML = '';
-            data.high_scores.forEach((score, index) => {
-                const scoreElement = document.createElement('div');
-                scoreElement.className = 'high-score-item';
-                scoreElement.innerHTML = `
-                    <div>${index + 1}. ${score.player}</div>
-                    <div style="color: #ffd93d; font-weight: bold;">${score.score}</div>
+
+            // Create combined scores array with current session score
+            let allScores = [...data.high_scores];
+
+            // Add current session score to the list for display
+            if (this.currentSessionScore > 0) {
+                allScores.push({
+                    player: this.currentPlayerName,
+                    score: this.currentSessionScore,
+                    is_current_session: true
+                });
+            }
+
+            // Sort by score descending and take top 5
+            allScores.sort((a, b) => b.score - a.score);
+            const topScores = allScores.slice(0, 5);
+
+            topScores.forEach((scoreData, index) => {
+                const scoreItem = document.createElement('div');
+                scoreItem.className = 'high-score-item';
+
+                // Check if this is the current user's score from this session
+                if (scoreData.is_current_session) {
+                    scoreItem.classList.add('current-user');
+                }
+
+                scoreItem.innerHTML = `
+                    <div class="rank">${index + 1}</div>
+                    <div class="player-name ${scoreData.is_current_session ? 'current-user' : ''}">
+                        ${scoreData.player}
+                        ${scoreData.is_current_session ? ' (You)' : ''}
+                    </div>
+                    <div class="score-value">${scoreData.score}</div>
                 `;
-                this.highScoresList.appendChild(scoreElement);
+
+                this.highScoresList.appendChild(scoreItem);
             });
+
         } catch (error) {
             console.error('Error loading high scores:', error);
+            // Fallback to default scores
+            this.highScoresList.innerHTML = `
+                <div class="high-score-item"><div class="rank">1</div><div class="player-name">Player1</div><div class="score-value">1500</div></div>
+                <div class="high-score-item"><div class="rank">2</div><div class="player-name">Player2</div><div class="score-value">1200</div></div>
+                <div class="high-score-item"><div class="rank">3</div><div class="player-name">Player3</div><div class="score-value">900</div></div>
+            `;
         }
     }
 
