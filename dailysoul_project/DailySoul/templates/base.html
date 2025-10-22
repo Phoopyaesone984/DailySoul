@@ -2,151 +2,760 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>{% block title %}DailySoul{% endblock %}</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<style>
-:root {
-  --bg1: #e8f5e9;
-  --bg2: #fff3e0;
-  --accent: #77bfa3;
-  --accent-dark: #5fa88d;
-  --accent-light: #e8f5e9;
-  --muted: #555;
-  --muted-light: #777;
-  --card-bg: #ffffff;
-  --radius: 16px;
-  --max-container-width: 1400px;
-}
-* { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { height: 100%; font-family: 'Poppins', sans-serif; scroll-behavior: smooth; overflow-x: hidden; }
-body { background: linear-gradient(135deg, var(--bg1), var(--bg2)); color: #222; line-height: 1.6; min-height: 100vh; }
-.page-container { display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 30px 20px 40px; width: 100%; }
-main { max-width: var(--max-container-width); width: 100%; margin: 0 auto; flex: 1; }
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}DailySoul{% endblock %}</title>
 
-.navbar { width: 100%; max-width: var(--max-container-width); display: flex; justify-content: space-between; align-items: center; background-color: var(--card-bg); padding: 20px 30px; border-radius: var(--radius); box-shadow: 0 6px 25px rgba(0,0,0,0.08); margin-bottom: 35px; position: relative; z-index: 1000; }
-.navbar .logo { color: var(--accent); font-weight: 700; font-size: 1.6rem; }
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-.nav-links { display: flex; align-items: center; }
-.nav-links ul { list-style: none; display: flex; gap: 5px; }
-.nav-links a { text-decoration: none; color: var(--muted); padding: 12px 18px; font-weight: 500; font-size: 1rem; border-radius: 8px; transition: all 0.3s ease; }
-.nav-links a:hover { color: var(--accent-dark); background-color: var(--accent-light); transform: translateY(-2px); }
+  <style>
+  /* ---------------- Theme (from your original) ---------------- */
+  :root {
+    --bg1: #e8f5e9;
+    --bg2: #fff3e0;
+    --accent: #77bfa3;
+    --accent-dark: #5fa88d;
+    --accent-light: #e8f5e9;
+    --muted: #555;
+    --muted-light: #777;
+    --card-bg: #ffffff;
+    --radius: 16px;
+    --radius-lg: 20px;
+    --tarot-width: 280px;
+    --tarot-height: 480px;
+    --max-container-width: 1400px;
+  }
 
-.mega-menu-item { position: relative; cursor: pointer; }
-.arrow-down { font-size: 0.7em; margin-left: 5px; transition: transform 0.3s ease; }
-.mega-menu-item.open .arrow-down { transform: rotate(180deg); }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    height: 100%;
+    font-family: 'Poppins', sans-serif;
+    scroll-behavior: smooth;
+    overflow-x: hidden;
+  }
 
-.mega-menu-content { display: none; position: absolute; top: calc(100% + 8px); left: 50%; transform: translateX(-50%) translateY(-10px); width: 500px; background-color: var(--card-bg); box-shadow: 0 15px 40px rgba(0,0,0,0.12); border-radius: var(--radius); padding: 25px; z-index: 1000; gap: 25px; border-top: 4px solid var(--accent); opacity: 0; transition: all 0.3s ease; }
-.mega-menu-item.open .mega-menu-content { display: flex; opacity: 1; transform: translateX(-50%) translateY(0); }
+  body {
+    background: linear-gradient(135deg, var(--bg1), var(--bg2));
+    color: #222;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
 
-.menu-column { flex: 1; display: flex; flex-direction: column; }
-.menu-column h3 { font-size: 1.05rem; color: var(--accent-dark); margin-bottom: 15px; }
-.menu-column a { padding: 8px 0; font-weight: 400; color: var(--muted-light); border-radius: 6px; padding-left: 8px; }
-.menu-column a:hover { color: var(--accent); padding-left: 12px; background-color: #f8f9fa; }
+  /* Main container for proper centering */
+  .page-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding: 30px 20px 40px;
+    width: 100%;
+  }
 
-.mobile-toggle { display: none; background: transparent; border: none; font-size: 1.4rem; cursor: pointer; padding: 8px; border-radius: 6px; }
-.mobile-toggle:hover { background-color: #f5f5f5; }
+  main {
+    max-width: var(--max-container-width);
+    width: 100%;
+    margin: 0 auto;
+    flex: 1;
+  }
 
-.mobile-nav { display: none; position: fixed; inset: 0; align-items: flex-start; justify-content: flex-end; z-index: 15000; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); }
-.mobile-drawer { width: 92%; max-width: 380px; background: var(--card-bg); height: 100vh; padding: 20px; box-shadow: -8px 0 40px rgba(0,0,0,0.15); transform: translateX(100%); transition: transform 0.35s ease; display: flex; flex-direction: column; gap: 15px; overflow-y: auto; }
-.mobile-nav.open { display: flex; }
-.mobile-drawer.open { transform: translateX(0); }
-.mobile-drawer .close-btn { align-self: flex-end; background: transparent; border: 0; font-size: 1.4rem; cursor: pointer; padding: 8px; border-radius: 6px; }
-.mobile-drawer nav { display: flex; flex-direction: column; gap: 5px; }
-.mobile-drawer nav a { display: block; padding: 14px 12px; color: var(--muted); text-decoration: none; border-radius: 10px; font-weight: 500; transition: all 0.2s ease; }
-.mobile-drawer nav a:hover { background: #f5f5f5; color: var(--accent-dark); transform: translateX(5px); }
+  /* ---------------- Enhanced Desktop Scroll Behavior ---------------- */
+  .scroll-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 0%;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-dark));
+    z-index: 1001;
+    transition: width 0.1s ease;
+  }
 
-</style>
+  /* Back to top button - desktop optimized */
+  .back-to-top {
+    position: fixed;
+    bottom: 40px;
+    right: 40px;
+    width: 55px;
+    height: 55px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px) scale(0.9);
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    font-weight: 600;
+  }
+
+  .back-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+  }
+
+  .back-to-top:hover {
+    background: var(--accent-dark);
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+  }
+
+  /* ---------------- Desktop Navbar (Fixed for better appearance) ---------------- */
+  .navbar {
+    width: 100%;
+    max-width: var(--max-container-width);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--card-bg);
+    padding: 20px 30px;
+    border-radius: var(--radius);
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.08);
+    margin-bottom: 35px;
+    position: relative;
+    z-index: 1000;
+  }
+
+  .navbar .logo {
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 1.6rem;
+    letter-spacing: -0.5px;
+  }
+
+  /* Desktop Navigation Links */
+  .nav-links {
+    display: flex;
+    align-items: center;
+  }
+
+  .nav-links ul {
+    list-style: none;
+    display: flex;
+    margin: 0;
+    padding: 0;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .nav-links li {
+    position: relative;
+  }
+
+  .nav-links a {
+    text-decoration: none;
+    color: var(--muted);
+    padding: 12px 18px;
+    font-weight: 500;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    border-radius: 8px;
+    display: block;
+    white-space: nowrap;
+  }
+
+  .nav-links a:hover {
+    color: var(--accent-dark);
+    background-color: var(--accent-light);
+    transform: translateY(-2px);
+  }
+
+  /* Mega Menu Desktop */
+  .mega-menu-item {
+    position: relative;
+  }
+
+  .arrow-down {
+    font-size: 0.7em;
+    margin-left: 8px;
+    line-height: 1;
+    transition: transform 0.3s ease;
+    display: inline-block;
+  }
+
+  .mega-menu-item.open .arrow-down {
+    transform: rotate(180deg);
+  }
+
+  .mega-menu-content {
+    display: none;
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%) translateY(-10px);
+    width: 500px;
+    background-color: var(--card-bg);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+    border-radius: var(--radius);
+    padding: 25px;
+    z-index: 1000;
+    gap: 25px;
+    border-top: 4px solid var(--accent);
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  .mega-menu-item:hover .mega-menu-content,
+  .mega-menu-item.open .mega-menu-content {
+    display: flex;
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  .menu-column {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .menu-column h3 {
+    font-size: 1.05rem;
+    color: var(--accent-dark);
+    margin-bottom: 15px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #f0f0f0;
+    font-weight: 600;
+  }
+
+  .menu-column a {
+    padding: 8px 0;
+    margin: 0 !important;
+    font-weight: 400;
+    font-size: 0.95rem;
+    color: var(--muted-light);
+    transition: all 0.25s ease;
+    border-radius: 6px;
+    padding-left: 8px;
+  }
+
+  .menu-column a:hover {
+    color: var(--accent);
+    background-color: #f8f9fa;
+    padding-left: 12px;
+    text-decoration: none;
+  }
+
+  /* ---------------- Scroll Animations for Desktop ---------------- */
+  .fade-in {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+
+  .fade-in.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .slide-in-left {
+    opacity: 0;
+    transform: translateX(-60px);
+    transition: opacity 0.9s ease, transform 0.9s ease;
+  }
+
+  .slide-in-left.visible {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  .slide-in-right {
+    opacity: 0;
+    transform: translateX(60px);
+    transition: opacity 0.9s ease, transform 0.9s ease;
+  }
+
+  .slide-in-right.visible {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  /* ---------------- Mobile Styles (unchanged from your working version) ---------------- */
+  .mobile-toggle {
+    display: none;
+    background: transparent;
+    border: none;
+    font-size: 1.4rem;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 6px;
+    transition: background-color 0.2s;
+  }
+
+  .mobile-toggle:hover {
+    background-color: #f5f5f5;
+  }
+
+  .mobile-nav {
+    display: none;
+    position: fixed;
+    inset: 0;
+    align-items: flex-start;
+    justify-content: flex-end;
+    z-index: 15000;
+    background: rgba(0,0,0,0.4);
+    backdrop-filter: blur(4px);
+  }
+
+  .mobile-drawer {
+    width: 92%;
+    max-width: 380px;
+    background: var(--card-bg);
+    height: 100vh;
+    padding: 20px;
+    box-shadow: -8px 0 40px rgba(0,0,0,0.15);
+    transform: translateX(100%);
+    transition: transform 0.35s cubic-bezier(.2,.9,.3,1);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    overflow-y: auto;
+  }
+
+  .mobile-nav.open { display: flex; }
+  .mobile-drawer.open { transform: translateX(0); }
+
+  .mobile-drawer .close-btn {
+    align-self: flex-end;
+    background: transparent;
+    border: 0;
+    font-size: 1.4rem;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 6px;
+    transition: background-color 0.2s;
+  }
+
+  .mobile-drawer .close-btn:hover {
+    background-color: #f5f5f5;
+  }
+
+  .mobile-drawer nav {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .mobile-drawer nav a {
+    display: block;
+    padding: 14px 12px;
+    color: var(--muted);
+    text-decoration: none;
+    border-radius: 10px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+  }
+
+  .mobile-drawer nav a:hover {
+    background: #f5f5f5;
+    color: var(--accent-dark);
+    transform: translateX(5px);
+  }
+
+  .mobile-submenu {
+    border-top: 1px solid #f0f0f0;
+    padding-top: 12px;
+    margin-top: 12px;
+  }
+
+  .mobile-submenu .submenu-toggle {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 12px;
+    cursor: pointer;
+    border-radius: 10px;
+    transition: background-color 0.2s;
+  }
+
+  .mobile-submenu .submenu-toggle:hover {
+    background-color: #f5f5f5;
+  }
+
+  .mobile-submenu .submenu-items {
+    display: none;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 12px;
+    padding-left: 10px;
+  }
+
+  .mobile-submenu.open .submenu-items {
+    display: flex;
+  }
+
+  .mobile-submenu .submenu-items a {
+    padding: 12px 10px;
+    font-size: 0.95rem;
+    border-radius: 8px;
+  }
+
+  /* ---------------- Responsive Breakpoints ---------------- */
+  @media (max-width: 1100px) {
+    .navbar {
+      padding: 18px 25px;
+    }
+
+    .nav-links a {
+      padding: 10px 15px;
+      font-size: 0.95rem;
+    }
+
+    .mega-menu-content {
+      width: 450px;
+    }
+  }
+
+  @media (max-width: 900px) {
+    .nav-links { display: none; }
+    .mobile-toggle { display: inline-block; }
+    .mega-menu-item { display: none; }
+
+    .page-container {
+      padding: 18px 12px 30px;
+    }
+
+    .navbar {
+      margin-bottom: 25px;
+      padding: 16px 20px;
+    }
+
+    .back-to-top {
+      bottom: 25px;
+      right: 25px;
+      width: 50px;
+      height: 50px;
+      font-size: 1.2rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .page-container {
+      padding: 15px 10px 25px;
+    }
+
+    .navbar {
+      padding: 14px 16px;
+      margin-bottom: 20px;
+    }
+
+    .navbar .logo {
+      font-size: 1.4rem;
+    }
+
+    .back-to-top {
+      bottom: 20px;
+      right: 20px;
+      width: 48px;
+      height: 48px;
+    }
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden;
+    clip: rect(0 0 0 0); border: 0; white-space: nowrap;
+  }
+
+  </style>
 </head>
 <body>
 
-<div class="page-container">
+  <!-- Scroll Progress Indicator -->
+  <div class="scroll-progress" id="scrollProgress"></div>
 
-  <nav class="navbar">
-    <div style="display:flex; align-items:center; gap:12px;">
-      <h2 class="logo">DailySoul</h2>
-    </div>
+  <!-- Back to Top Button -->
+  <button class="back-to-top" id="backToTop" aria-label="Back to top">↑</button>
 
-    <div class="nav-links">
-      <ul>
-        <li><a href="{% url 'dashboard' %}">Home</a></li>
-        <li><a href="/journal/">Journal</a></li>
-        <li><a href="/deathnote/">DeathNote</a></li>
+  <div class="page-container">
+    <!-- ---------------- NAVBAR ---------------- -->
+    <nav class="navbar" role="navigation" aria-label="Main Navigation">
+      <div style="display:flex; align-items:center; gap:12px;">
+        <h2 class="logo">DailySoul</h2>
+      </div>
 
-        <li class="mega-menu-item" id="megaItem">
-          <span id="miniGamesNav">Mini-Games <span class="arrow-down">▼</span></span>
-          <div class="mega-menu-content">
-            <div class="menu-column">
-              <h3>Mind Games</h3>
+      <!-- Desktop Links -->
+      <div class="nav-links" aria-hidden="false">
+        <ul>
+          <li><a href="{% url 'dashboard' %}">Home</a></li>
+          <li><a href="/journal/">Journal</a></li>
+          <li><a href="/deathnote/">DeathNote</a></li>
+
+          <!-- Desktop Mega Menu / Mini-Games -->
+          <li class="mega-menu-item">
+            <a href="{% url 'dashboard' %}#miniGamesSection" id="miniGamesNav">
+              Mini-Games <span class="arrow-down" aria-hidden="true">▼</span>
+            </a>
+
+            <div class="mega-menu-content" id="megaMenuContent" role="menu" aria-label="Mini Games">
+              <div class="menu-column">
+                <h3>Mind Games</h3>
+                <a href="{% url 'bubble_pop' %}">Bubble Pop</a>
+                <a href="/games/crossword/">Daily Crossword</a>
+                <a href="/games/memory/">Memory Match</a>
+                <a href="{% url 'color_therapy' %}">Color Therapy</a>
+                <a href="{% url 'dashboard' %}#miniGamesSection" id="mobileMiniScroll">Go to Mini-Games Section</a>
+              </div>
+            </div>
+          </li>
+
+          <li><a href="{% url 'logout' %}">Logout</a></li>
+        </ul>
+      </div>
+
+      <button class="mobile-toggle" id="mobileToggle" aria-label="Open menu" aria-expanded="false">☰</button>
+    </nav>
+
+    <!-- Mobile Navigation -->
+    <div class="mobile-nav" id="mobileNav" aria-hidden="true">
+      <div class="mobile-drawer" id="mobileDrawer" role="dialog" aria-modal="true" aria-label="Mobile menu">
+        <button class="close-btn" id="mobileClose" aria-label="Close menu">✕</button>
+        <nav>
+          <a href="{% url 'dashboard' %}">Home</a>
+          <a href="/journal/">Journal</a>
+          <a href="/deathnote/">DeathNote</a>
+
+          <div class="mobile-submenu" id="mobileMiniSub">
+            <div class="submenu-toggle" id="mobileMiniToggle" role="button" aria-expanded="false">
+              <span>Mini-Games</span>
+              <span class="arrow-mobile" aria-hidden="true">▾</span>
+            </div>
+            <div class="submenu-items" id="mobileMiniItems">
               <a href="{% url 'bubble_pop' %}">Bubble Pop</a>
               <a href="/games/crossword/">Daily Crossword</a>
               <a href="/games/memory/">Memory Match</a>
-              <a href="{% url 'mini_games' %}">Browse All Games</a>
+              <a href="{% url 'color_therapy' %}">Color Therapy</a>
+              <a href="{% url 'dashboard' %}#miniGamesSection" id="mobileMiniScroll">Go to Mini-Games Section</a>
             </div>
           </div>
-        </li>
 
-        <li><a href="{% url 'logout' %}">Logout</a></li>
-      </ul>
+          <a href="{% url 'logout' %}">Logout</a>
+        </nav>
+      </div>
     </div>
 
-    <button class="mobile-toggle" id="mobileToggle">☰</button>
-  </nav>
-
-  <div class="mobile-nav" id="mobileNav">
-    <div class="mobile-drawer" id="mobileDrawer">
-      <button class="close-btn" id="mobileClose">✕</button>
-      <nav>
-        <a href="{% url 'dashboard' %}">Home</a>
-        <a href="/journal/">Journal</a>
-        <a href="/deathnote/">DeathNote</a>
-        <a href="{% url 'logout' %}">Logout</a>
-      </nav>
-    </div>
+    <main>
+      {% block content %}{% endblock %}
+    </main>
   </div>
 
-  <main>
-    {% block content %}
-    <section id="miniGamesSection" style="margin-top:1000px;">
-      <h2>Mini Games Section</h2>
-      <p>Here are your games...</p>
-    </section>
-    {% endblock %}
-  </main>
-</div>
+  <script>
+  (function(){
+    /* ---------- Enhanced Desktop Scroll Behavior ---------- */
+    const scrollProgress = document.getElementById('scrollProgress');
+    const backToTop = document.getElementById('backToTop');
 
-<script>
-const miniNav = document.getElementById('miniGamesNav');
-const megaItem = document.getElementById('megaItem');
-const section = document.getElementById('miniGamesSection');
+    // Scroll progress indicator
+    function updateScrollProgress() {
+      const winHeight = window.innerHeight;
+      const docHeight = document.documentElement.scrollHeight - winHeight;
+      const scrolled = (window.scrollY / docHeight) * 100;
+      scrollProgress.style.width = scrolled + '%';
+    }
 
-let isOpen = false;
-miniNav.addEventListener('click', function() {
-  if(!isOpen) {
-    megaItem.classList.add('open');
-    isOpen = true;
-    const y = section.getBoundingClientRect().top + window.pageYOffset - 20;
-    window.scrollTo({top: y, behavior: 'smooth'});
-  } else {
-    megaItem.classList.remove('open');
-    isOpen = false;
-    window.scrollTo({top: 0, behavior: 'smooth'});
-  }
-});
+    // Back to top button with better timing
+    function updateBackToTop() {
+      if (window.scrollY > 500) {
+        backToTop.classList.add('visible');
+      } else {
+        backToTop.classList.remove('visible');
+      }
+    }
 
-// Mobile drawer
-const mobileToggle = document.getElementById('mobileToggle');
-const mobileNav = document.getElementById('mobileNav');
-const mobileDrawer = document.getElementById('mobileDrawer');
-const mobileClose = document.getElementById('mobileClose');
+    // Smooth scroll to top
+    function scrollToTop() {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    }
 
-function openMobile(){ mobileNav.classList.add('open'); mobileDrawer.classList.add('open'); document.body.style.overflow='hidden'; }
-function closeMobile(){ mobileNav.classList.remove('open'); mobileDrawer.classList.remove('open'); document.body.style.overflow=''; }
+    // Scroll event listener with throttling
+    let scrollTimeout;
+    window.addEventListener('scroll', function() {
+      if (!scrollTimeout) {
+        scrollTimeout = setTimeout(function() {
+          updateScrollProgress();
+          updateBackToTop();
+          scrollTimeout = null;
+        }, 10);
+      }
+    });
 
-if(mobileToggle) mobileToggle.addEventListener('click', ()=>{ mobileNav.classList.contains('open') ? closeMobile() : openMobile(); });
-if(mobileClose) mobileClose.addEventListener('click', closeMobile);
-if(mobileNav) mobileNav.addEventListener('click', e => { if(e.target === mobileNav) closeMobile(); });
-</script>
+    // Back to top click event
+    backToTop.addEventListener('click', scrollToTop);
+
+    // Initialize scroll effects
+    updateScrollProgress();
+    updateBackToTop();
+
+    /* ---------- Enhanced Scroll Animations for Desktop ---------- */
+    function checkScroll() {
+      const elements = document.querySelectorAll('.fade-in, .slide-in-left, .slide-in-right');
+      const windowHeight = window.innerHeight;
+      const triggerBottom = windowHeight * 0.85;
+
+      elements.forEach(element => {
+        const elementTop = element.getBoundingClientRect().top;
+
+        if (elementTop < triggerBottom) {
+          element.classList.add('visible');
+        }
+      });
+    }
+
+    // Initial check and scroll listener for animations
+    window.addEventListener('scroll', checkScroll);
+    window.addEventListener('load', checkScroll);
+    setTimeout(checkScroll, 100); // Initial check after load
+
+    /* ---------- Enhanced Smooth Scrolling for Desktop ---------- */
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        const targetId = this.getAttribute('href');
+        if (targetId === '#') return;
+
+        const targetElement = document.querySelector(targetId);
+        if (targetElement) {
+          e.preventDefault();
+          const navbarHeight = 0; // No fixed navbar offset needed
+          const targetPosition = targetElement.getBoundingClientRect().top + window.pageYOffset - navbarHeight - 30;
+
+          window.scrollTo({
+            top: targetPosition,
+            behavior: 'smooth'
+          });
+        }
+      });
+    });
+
+    /* ---------- Your existing mini-games functionality (unchanged) ---------- */
+    const miniNav = document.getElementById('miniGamesNav');
+    const megaItem = miniNav ? miniNav.closest('.mega-menu-item') : null;
+    const megaContent = document.getElementById('megaMenuContent');
+    const sectionId = 'miniGamesSection';
+    const dashboardPath = "{% url 'dashboard' %}";
+
+    function normalizePath(p){ return (p||'').replace(/\/$/, ''); }
+    function onDashboard(){ return normalizePath(window.location.pathname) === normalizePath(new URL(dashboardPath, window.location.origin).pathname); }
+    function getNavbarOffset(){ return 0; } // No offset needed
+    function scrollToSection(){ const el=document.getElementById(sectionId); if(!el) return; const y = el.getBoundingClientRect().top + window.pageYOffset - getNavbarOffset(); window.scrollTo({top: Math.round(y), behavior: 'smooth'}); }
+    function scrollToTop(){ window.scrollTo({top: 0, behavior: 'smooth'}); }
+
+    if(miniNav && megaItem && megaContent){
+      miniNav.addEventListener('click', function(e){
+        if(!onDashboard()){
+          try { sessionStorage.setItem('ds_open_mini_games', '1'); } catch(err) {}
+          return;
+        }
+        e.preventDefault();
+        if(megaItem.classList.contains('open')){
+          megaItem.classList.remove('open');
+          miniNav.setAttribute('aria-expanded','false');
+          scrollToTop();
+        } else {
+          megaItem.classList.add('open');
+          miniNav.setAttribute('aria-expanded','true');
+          setTimeout(scrollToSection, 80);
+        }
+      });
+
+      document.addEventListener('click', function(ev){
+        if(!megaItem.classList.contains('open')) return;
+        if(!megaItem.contains(ev.target) && ev.target !== miniNav){
+          megaItem.classList.remove('open');
+          miniNav.setAttribute('aria-expanded','false');
+          scrollToTop();
+        }
+      });
+
+      document.addEventListener('keydown', function(ev){
+        if((ev.key === 'Escape' || ev.key === 'Esc') && megaItem.classList.contains('open')){
+          megaItem.classList.remove('open');
+          miniNav.setAttribute('aria-expanded','false');
+          scrollToTop();
+        }
+      });
+
+      (function maybeAuto(){
+        try {
+          if(sessionStorage.getItem('ds_open_mini_games') === '1'){
+            sessionStorage.removeItem('ds_open_mini_games');
+            setTimeout(function(){ megaItem.classList.add('open'); miniNav.setAttribute('aria-expanded','true'); scrollToSection(); }, 140);
+            return;
+          }
+        } catch(e){}
+        if(onDashboard() && window.location.hash === '#' + sectionId){
+          setTimeout(function(){ megaItem.classList.add('open'); miniNav.setAttribute('aria-expanded','true'); scrollToSection(); }, 140);
+        }
+      })();
+
+      window.addEventListener('hashchange', function(){
+        if(window.location.hash === '#' + sectionId && onDashboard()){
+          megaItem.classList.add('open');
+          miniNav.setAttribute('aria-expanded','true');
+          setTimeout(scrollToSection, 120);
+        }
+      });
+    }
+
+    /* ---------- Mobile drawer behavior (unchanged) ---------- */
+    const mobileToggle = document.getElementById('mobileToggle');
+    const mobileNav = document.getElementById('mobileNav');
+    const mobileDrawer = document.getElementById('mobileDrawer');
+    const mobileClose = document.getElementById('mobileClose');
+    const mobileMiniToggle = document.getElementById('mobileMiniToggle');
+    const mobileMiniSub = document.getElementById('mobileMiniSub');
+    const mobileMiniItems = document.getElementById('mobileMiniItems');
+    const mobileMiniScroll = document.getElementById('mobileMiniScroll');
+
+    function openMobile(){ if(mobileNav){ mobileNav.classList.add('open'); mobileDrawer.classList.add('open'); mobileNav.setAttribute('aria-hidden','false'); mobileToggle.setAttribute('aria-expanded','true'); document.body.style.overflow='hidden'; } }
+    function closeMobile(){ if(mobileNav){ mobileNav.classList.remove('open'); mobileDrawer.classList.remove('open'); mobileNav.setAttribute('aria-hidden','true'); mobileToggle.setAttribute('aria-expanded','false'); document.body.style.overflow=''; } }
+
+    if(mobileToggle){
+      mobileToggle.addEventListener('click', function(){ if(mobileNav.classList.contains('open')) closeMobile(); else openMobile(); });
+    }
+    if(mobileClose){
+      mobileClose.addEventListener('click', closeMobile);
+    }
+    if(mobileNav){
+      mobileNav.addEventListener('click', function(e){ if(e.target === mobileNav) closeMobile(); });
+    }
+
+    if(mobileMiniToggle && mobileMiniSub){
+      mobileMiniToggle.addEventListener('click', function(){
+        const isOpen = mobileMiniSub.classList.contains('open');
+        if(isOpen){ mobileMiniSub.classList.remove('open'); mobileMiniToggle.setAttribute('aria-expanded','false'); }
+        else { mobileMiniSub.classList.add('open'); mobileMiniToggle.setAttribute('aria-expanded','true'); }
+      });
+    }
+
+    if(mobileMiniScroll){
+      mobileMiniScroll.addEventListener('click', function(e){
+        closeMobile();
+        setTimeout(function(){
+          if(onDashboard()){
+            setTimeout(scrollToSection, 80);
+            if(megaItem){ megaItem.classList.add('open'); if(miniNav) miniNav.setAttribute('aria-expanded','true'); }
+          } else {
+            try { sessionStorage.setItem('ds_open_mini_games','1'); } catch(e){}
+          }
+        }, 220);
+      });
+    }
+
+    document.addEventListener('keydown', function(e){
+      if((e.key === 'Escape' || e.key === 'Esc') && mobileNav && mobileNav.classList.contains('open')){ closeMobile(); }
+    });
+
+  })();
+  </script>
+
 </body>
 </html>

@@ -16,4 +16,5 @@ urlpatterns = [
     path('games/bubble-pop/', views.bubble_pop_game, name='bubble_pop'),
     path('games/bubble-pop/save-score/', views.save_bubble_score, name='save_bubble_score'),
     path('games/bubble-pop/high-scores/', views.get_bubble_high_scores, name='get_bubble_high_scores'),
+    path('color_therapy/', views.color_therapy, name='color_therapy'),
 ]

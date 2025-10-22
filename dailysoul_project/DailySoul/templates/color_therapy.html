@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Color Therapy{% endblock %}
+{% block content %}
+<style>
+  .ct-wrapper { display:flex; flex-direction:column; align-items:center; padding:24px; }
+  .palette { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:18px; justify-content:center; max-width:90vw; }
+  .color { width:30px; height:30px; border-radius:50%; cursor:pointer; border:2px solid #fff; box-shadow:0 2px 6px rgba(0,0,0,0.12); }
+  .canvas-container { position: relative; }
+  canvas { background:#fff; border-radius:12px; box-shadow:0 8px 25px rgba(0,0,0,0.12); touch-action:none; max-width:100%; height:auto; margin-bottom:12px;}
+  .ct-btn { margin:6px; padding:8px 14px; border:none; background:#77bfa3; color:#fff; border-radius:6px; cursor:pointer; font-weight:600; }
+  .ct-btn:hover { background:#5fa88d; }
+  .image-selector { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:12px; justify-content:center; }
+  .image-selector img { width:80px; height:60px; object-fit:cover; border:2px solid #ccc; border-radius:8px; cursor:pointer; }
+  .image-selector img.selected { border:3px solid #5fa88d; }
+</style>
+
+<div class="ct-wrapper">
+  <h1>🎨 Color Therapy</h1>
+
+  <!-- Color palette -->
+  <div class="palette" id="palette">
+    <!-- 20 colors -->
+    <div class="color" style="background:#f87171" data-color="#f87171"></div>
+    <div class="color" style="background:#facc15" data-color="#facc15"></div>
+    <div class="color" style="background:#4ade80" data-color="#4ade80"></div>
+    <div class="color" style="background:#60a5fa" data-color="#60a5fa"></div>
+    <div class="color" style="background:#a78bfa" data-color="#a78bfa"></div>
+    <div class="color" style="background:#f472b6" data-color="#f472b6"></div>
+    <div class="color" style="background:#94a3b8" data-color="#94a3b8"></div>
+    <div class="color" style="background:#fcd34d" data-color="#fcd34d"></div>
+    <div class="color" style="background:#fb7185" data-color="#fb7185"></div>
+    <div class="color" style="background:#34d399" data-color="#34d399"></div>
+    <div class="color" style="background:#f97316" data-color="#f97316"></div>
+    <div class="color" style="background:#6366f1" data-color="#6366f1"></div>
+    <div class="color" style="background:#ec4899" data-color="#ec4899"></div>
+    <div class="color" style="background:#10b981" data-color="#10b981"></div>
+    <div class="color" style="background:#3b82f6" data-color="#3b82f6"></div>
+    <div class="color" style="background:#8b5cf6" data-color="#8b5cf6"></div>
+    <div class="color" style="background:#22d3ee" data-color="#22d3ee"></div>
+    <div class="color" style="background:#e879f9" data-color="#e879f9"></div>
+    <div class="color" style="background:#fde68a" data-color="#fde68a"></div>
+    <div class="color" style="background:#a3e635" data-color="#a3e635"></div>
+  </div>
+
+  <div class="canvas-container">
+    <canvas id="canvas" width="800" height="500"></canvas>
+  </div>
+
+  <div>
+    <button id="undoBtn" class="ct-btn">Undo</button>
+    <button id="redoBtn" class="ct-btn">Redo</button>
+    <button id="clearBtn" class="ct-btn">Clear All</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+  const colors = document.querySelectorAll('.color');
+  const undoBtn = document.getElementById('undoBtn');
+  const redoBtn = document.getElementById('redoBtn');
+  const clearBtn = document.getElementById('clearBtn');
+  const images = document.querySelectorAll('.image-selector img');
+
+  let drawing = false;
+  let currentColor = '#4ade80';
+  let lineWidth = 14;
+  let currentPath = [];
+  let backgroundImg = new Image();
+
+  const undoStack = [];
+  const redoStack = [];
+
+  // Color picker
+  colors.forEach(c => {
+    c.addEventListener('click', () => {
+      currentColor = c.dataset.color;
+      colors.forEach(cc => cc.style.border = '2px solid #fff');
+      c.style.border = '3px solid #000';
+    });
+  });
+
+  // Image selector
+  images.forEach(img => {
+    img.addEventListener('click', () => {
+      images.forEach(i => i.classList.remove('selected'));
+      img.classList.add('selected');
+      loadImage(img.dataset.src);
+    });
+  });
+
+  function loadImage(src){
+    backgroundImg = new Image();
+    backgroundImg.src = src;
+    backgroundImg.onload = function(){
+      undoStack.push([{image: src}]); // initial background
+      redoStack.length = 0;
+      redraw();
+    }
+  }
+
+  function resizeCanvas(){
+    const w = canvas.clientWidth;
+    const h = canvas.clientHeight;
+    canvas.width = w;
+    canvas.height = h;
+    redraw();
+  }
+  window.addEventListener('resize', resizeCanvas);
+
+  function getMousePos(evt){
+    const rect = canvas.getBoundingClientRect();
+    const x = (evt.clientX !== undefined ? evt.clientX : evt.touches[0].clientX) - rect.left;
+    const y = (evt.clientY !== undefined ? evt.clientY : evt.touches[0].clientY) - rect.top;
+    return {x, y};
+  }
+
+  function startDraw(e){
+    drawing = true;
+    currentPath = [];
+    draw(e);
+  }
+
+  function endDraw(){
+    if(drawing){
+      undoStack.push([...currentPath]);
+      redoStack.length = 0;
+    }
+    drawing = false;
+    ctx.beginPath();
+  }
+
+  function draw(e){
+    if(!drawing) return;
+    const pos = getMousePos(e);
+    ctx.lineWidth = lineWidth;
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = currentColor;
+    ctx.lineTo(pos.x, pos.y);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(pos.x, pos.y);
+    currentPath.push({x: pos.x, y: pos.y, color: currentColor, lineWidth});
+  }
+
+  function redraw(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    // Draw background first
+    if(backgroundImg.src){
+      ctx.drawImage(backgroundImg, 0, 0, canvas.width, canvas.height);
+    }
+    // Draw strokes
+    undoStack.forEach(path => {
+      if(path[0].image){
+        // background handled
+        return;
+      }
+      ctx.beginPath();
+      path.forEach(p=>{
+        ctx.strokeStyle = p.color;
+        ctx.lineWidth = p.lineWidth;
+        ctx.lineTo(p.x, p.y);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(p.x,p.y);
+      });
+    });
+  }
+
+  // Undo / Redo / Clear
+  undoBtn.addEventListener('click', ()=>{
+    if(undoStack.length){
+      redoStack.push(undoStack.pop());
+      redraw();
+    }
+  });
+  redoBtn.addEventListener('click', ()=>{
+    if(redoStack.length){
+      undoStack.push(redoStack.pop());
+      redraw();
+    }
+  });
+  clearBtn.addEventListener('click', ()=>{
+    undoStack.length = 0;
+    redoStack.length = 0;
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    if(backgroundImg.src) ctx.drawImage(backgroundImg,0,0,canvas.width,canvas.height);
+  });
+
+  // Events
+  canvas.addEventListener('mousedown', startDraw);
+  window.addEventListener('mouseup', endDraw);
+  canvas.addEventListener('mousemove', draw);
+  canvas.addEventListener('touchstart', e=>{startDraw(e.touches[0]); e.preventDefault();},{passive:false});
+  canvas.addEventListener('touchmove', e=>{draw(e.touches[0]); e.preventDefault();},{passive:false});
+  canvas.addEventListener('touchend', e=>{endDraw(); e.preventDefault();},{passive:false});
+
+  // Init
+  loadImage(images[0].dataset.src);
+  resizeCanvas();
+})();
+</script>
+{% endblock %}

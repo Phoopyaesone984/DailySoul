@@ -503,3 +503,15 @@ def get_bubble_high_scores(request):
         {'player': 'Player5', 'score': 750},
     ]
     return JsonResponse({'high_scores': high_scores})
+
+
+# games/views.py
+from django.shortcuts import render
+from django.views.decorators.http import require_GET
+
+@require_GET
+def color_therapy(request):
+    """
+    Simple color therapy page served from existing 'games' app.
+    """
+    return render(request, 'color_therapy.html')
