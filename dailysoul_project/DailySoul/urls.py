@@ -12,9 +12,9 @@ urlpatterns = [
     path('api/get-piles/', views.api_get_piles, name='api_get_piles'),
     path('journal/', views.journal, name='journal'),
     path('deathnote/', views.deathnote, name='death_note'),
-    path('mini_games/', views.mini_games, name='mini_games'),
     path('games/bubble-pop/', views.bubble_pop_game, name='bubble_pop'),
     path('games/bubble-pop/save-score/', views.save_bubble_score, name='save_bubble_score'),
     path('games/bubble-pop/high-scores/', views.get_bubble_high_scores, name='get_bubble_high_scores'),
     path('color_therapy/', views.color_therapy, name='color_therapy'),
+    path('memory_match/', views.memory_match_game, name='memory_match'),
 ]

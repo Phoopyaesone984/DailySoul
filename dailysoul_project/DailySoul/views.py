@@ -444,16 +444,6 @@ def deathnote(request):
 
 from django.shortcuts import render
 
-def mini_games(request):
-    # You can pass data for mini-games if needed later
-    games = [
-        {"id": "memory", "title": "Card Match", "desc": "Match pairs of positive affirmations", "icon": "🃏"},
-        {"id": "bubble", "title": "Bubble Pop", "desc": "Pop negative thought bubbles", "icon": "💭"},
-        {"id": "zen", "title": "Zen Garden", "desc": "Arrange stones and plants to relax", "icon": "🌿"},
-    ]
-    return render(request, 'mini_games.html', {"games": games})
-
-
 from django.shortcuts import render
 from django.http import JsonResponse
 import json
@@ -515,3 +505,9 @@ def color_therapy(request):
     Simple color therapy page served from existing 'games' app.
     """
     return render(request, 'color_therapy.html')
+
+from django.shortcuts import render
+
+def memory_match_game(request):
+
+    return render(request, 'memory_match.html')

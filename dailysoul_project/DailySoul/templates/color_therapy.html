@@ -3,203 +3,315 @@
 {% block title %}Color Therapy{% endblock %}
 {% block content %}
 <style>
-  .ct-wrapper { display:flex; flex-direction:column; align-items:center; padding:24px; }
-  .palette { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:18px; justify-content:center; max-width:90vw; }
+  .ct-wrapper { display:flex; flex-direction:column; align-items:center; padding:18px; }
+  .top-row { display:flex; gap:12px; align-items:center; flex-wrap:wrap; justify-content:center; width:100%; max-width:1100px; margin-bottom:12px; }
+  .palette { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:6px; justify-content:center; }
   .color { width:30px; height:30px; border-radius:50%; cursor:pointer; border:2px solid #fff; box-shadow:0 2px 6px rgba(0,0,0,0.12); }
-  .canvas-container { position: relative; }
-  canvas { background:#fff; border-radius:12px; box-shadow:0 8px 25px rgba(0,0,0,0.12); touch-action:none; max-width:100%; height:auto; margin-bottom:12px;}
-  .ct-btn { margin:6px; padding:8px 14px; border:none; background:#77bfa3; color:#fff; border-radius:6px; cursor:pointer; font-weight:600; }
-  .ct-btn:hover { background:#5fa88d; }
-  .image-selector { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:12px; justify-content:center; }
-  .image-selector img { width:80px; height:60px; object-fit:cover; border:2px solid #ccc; border-radius:8px; cursor:pointer; }
-  .image-selector img.selected { border:3px solid #5fa88d; }
+  .color.selected { outline:3px solid rgba(0,0,0,0.08); transform:scale(1.05); }
+  .canvas-wrap { width:100%; max-width:900px; border-radius:12px; padding:10px; background:linear-gradient(180deg,#fff,#fbfbfd); box-shadow:0 10px 30px rgba(0,0,0,0.05); }
+  .canvas-container { position:relative; width:100%; }
+  canvas { display:block; width:100%; height:500px; border-radius:8px; background:#fff; touch-action:none; }
+  .controls { display:flex; gap:8px; flex-wrap:wrap; align-items:center; justify-content:center; margin-top:10px; }
+  .ct-btn { padding:8px 12px; border:none; background:#77bfa3; color:#fff; border-radius:8px; cursor:pointer; font-weight:600; }
+  .ct-btn.secondary { background:#fff; color:#444; border:1px solid #e6eef0; }
+  label { font-size:14px; color:#444; margin-right:6px; }
+  input[type=range] { vertical-align:middle; }
+  .small { padding:6px 10px; font-size:14px; }
+  @media (max-width:720px){
+    canvas { height: 60vw; } /* responsive ratio */
+  }
 </style>
 
 <div class="ct-wrapper">
   <h1>🎨 Color Therapy</h1>
 
-  <!-- Color palette -->
-  <div class="palette" id="palette">
-    <!-- 20 colors -->
-    <div class="color" style="background:#f87171" data-color="#f87171"></div>
-    <div class="color" style="background:#facc15" data-color="#facc15"></div>
-    <div class="color" style="background:#4ade80" data-color="#4ade80"></div>
-    <div class="color" style="background:#60a5fa" data-color="#60a5fa"></div>
-    <div class="color" style="background:#a78bfa" data-color="#a78bfa"></div>
-    <div class="color" style="background:#f472b6" data-color="#f472b6"></div>
-    <div class="color" style="background:#94a3b8" data-color="#94a3b8"></div>
-    <div class="color" style="background:#fcd34d" data-color="#fcd34d"></div>
-    <div class="color" style="background:#fb7185" data-color="#fb7185"></div>
-    <div class="color" style="background:#34d399" data-color="#34d399"></div>
-    <div class="color" style="background:#f97316" data-color="#f97316"></div>
-    <div class="color" style="background:#6366f1" data-color="#6366f1"></div>
-    <div class="color" style="background:#ec4899" data-color="#ec4899"></div>
-    <div class="color" style="background:#10b981" data-color="#10b981"></div>
-    <div class="color" style="background:#3b82f6" data-color="#3b82f6"></div>
-    <div class="color" style="background:#8b5cf6" data-color="#8b5cf6"></div>
-    <div class="color" style="background:#22d3ee" data-color="#22d3ee"></div>
-    <div class="color" style="background:#e879f9" data-color="#e879f9"></div>
-    <div class="color" style="background:#fde68a" data-color="#fde68a"></div>
-    <div class="color" style="background:#a3e635" data-color="#a3e635"></div>
+  <div class="top-row">
+    <!-- Palette -->
+    <div>
+      <div style="font-weight:700;margin-bottom:6px;">Palette</div>
+      <div class="palette" id="palette">
+        <!-- Add or remove colors as you like -->
+        <div class="color" style="background:#f87171" data-color="#f87171"></div>
+        <div class="color" style="background:#fb7185" data-color="#fb7185"></div>
+        <div class="color" style="background:#f472b6" data-color="#f472b6"></div>
+        <div class="color" style="background:#facc15" data-color="#facc15"></div>
+        <div class="color" style="background:#fde68a" data-color="#fde68a"></div>
+        <div class="color" style="background:#4ade80" data-color="#4ade80"></div>
+        <div class="color" style="background:#34d399" data-color="#34d399"></div>
+        <div class="color" style="background:#a3e635" data-color="#a3e635"></div>
+        <div class="color" style="background:#60a5fa" data-color="#60a5fa"></div>
+        <div class="color" style="background:#3b82f6" data-color="#3b82f6"></div>
+        <div class="color" style="background:#6366f1" data-color="#6366f1"></div>
+        <div class="color" style="background:#8b5cf6" data-color="#8b5cf6"></div>
+        <div class="color" style="background:#e879f9" data-color="#e879f9"></div>
+        <div class="color" style="background:#94a3b8" data-color="#94a3b8"></div>
+        <div class="color" style="background:#f97316" data-color="#f97316"></div>
+        <div class="color" style="background:#22d3ee" data-color="#22d3ee"></div>
+        <div class="color" style="background:#111827" data-color="#111827"></div>
+        <div class="color" style="background:#ffffff; border:1px solid #ddd" data-color="#ffffff"></div>
+      </div>
+    </div>
+
+    <!-- Brush size & tool toggle -->
+    <div style="display:flex;flex-direction:column;gap:6px;">
+      <div style="font-weight:700;">Brush</div>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <label for="sizeRange">Size</label>
+        <input id="sizeRange" type="range" min="4" max="80" value="14">
+        <span id="sizeLabel">14</span> px
+      </div>
+      <div style="display:flex; gap:8px; margin-top:6px;">
+        <!-- Single tool toggle button (Pen <-> Eraser) -->
+        <button id="toolToggle" class="ct-btn small secondary">Tool: Pen</button>
+      </div>
+    </div>
+
+    <!-- Download -->
+    <div style="display:flex; flex-direction:column; gap:6px;">
+      <div style="font-weight:700;">Save</div>
+      <div style="display:flex; gap:8px;">
+        <button id="downloadBtn" class="ct-btn small">Download PNG</button>
+      </div>
+    </div>
   </div>
 
-  <div class="canvas-container">
-    <canvas id="canvas" width="800" height="500"></canvas>
-  </div>
+  <!-- canvas -->
+  <div class="canvas-wrap">
+    <div class="canvas-container">
+      <canvas id="canvas" width="800" height="500"></canvas>
+    </div>
 
-  <div>
-    <button id="undoBtn" class="ct-btn">Undo</button>
-    <button id="redoBtn" class="ct-btn">Redo</button>
-    <button id="clearBtn" class="ct-btn">Clear All</button>
+    <div class="controls">
+      <button id="undoBtn" class="ct-btn small">Undo</button>
+      <button id="redoBtn" class="ct-btn small">Redo</button>
+      <button id="clearBtn" class="ct-btn small secondary">Clear All</button>
+    </div>
   </div>
 </div>
 
 <script>
+/*
+Full working Color Therapy template script
+- Single tool toggle (Pen <-> Eraser)
+- Stroke-based undo/redo
+- Brush size control
+- Download PNG (same-origin images only)
+- Correct coordinate handling for touch & mouse
+*/
+
 (function(){
+  // Elements
   const canvas = document.getElementById('canvas');
   const ctx = canvas.getContext('2d');
-  const colors = document.querySelectorAll('.color');
+  const palette = document.getElementById('palette');
+  const colors = palette.querySelectorAll('.color');
+  const sizeRange = document.getElementById('sizeRange');
+  const sizeLabel = document.getElementById('sizeLabel');
+  const toolToggle = document.getElementById('toolToggle');
+  const downloadBtn = document.getElementById('downloadBtn');
   const undoBtn = document.getElementById('undoBtn');
   const redoBtn = document.getElementById('redoBtn');
   const clearBtn = document.getElementById('clearBtn');
-  const images = document.querySelectorAll('.image-selector img');
 
-  let drawing = false;
+  // State
   let currentColor = '#4ade80';
-  let lineWidth = 14;
-  let currentPath = [];
-  let backgroundImg = new Image();
-
+  let lineWidth = Number(sizeRange.value) || 14;
+  let isEraser = false;
+  let drawing = false;
+  let currentStroke = null;
   const undoStack = [];
   const redoStack = [];
 
-  // Color picker
-  colors.forEach(c => {
-    c.addEventListener('click', () => {
-      currentColor = c.dataset.color;
-      colors.forEach(cc => cc.style.border = '2px solid #fff');
-      c.style.border = '3px solid #000';
-    });
-  });
-
-  // Image selector
-  images.forEach(img => {
-    img.addEventListener('click', () => {
-      images.forEach(i => i.classList.remove('selected'));
-      img.classList.add('selected');
-      loadImage(img.dataset.src);
-    });
-  });
-
-  function loadImage(src){
-    backgroundImg = new Image();
-    backgroundImg.src = src;
-    backgroundImg.onload = function(){
-      undoStack.push([{image: src}]); // initial background
-      redoStack.length = 0;
-      redraw();
-    }
+  // Helpers
+  function setActiveColor(el) {
+    colors.forEach(c => c.classList.remove('selected'));
+    if(el) el.classList.add('selected');
+    currentColor = el ? el.dataset.color : currentColor;
   }
 
-  function resizeCanvas(){
-    const w = canvas.clientWidth;
-    const h = canvas.clientHeight;
-    canvas.width = w;
-    canvas.height = h;
-    redraw();
-  }
-  window.addEventListener('resize', resizeCanvas);
-
-  function getMousePos(evt){
+  function getPosFromEvent(e) {
     const rect = canvas.getBoundingClientRect();
-    const x = (evt.clientX !== undefined ? evt.clientX : evt.touches[0].clientX) - rect.left;
-    const y = (evt.clientY !== undefined ? evt.clientY : evt.touches[0].clientY) - rect.top;
-    return {x, y};
+    const clientX = (e.clientX !== undefined) ? e.clientX : (e.touches && e.touches[0] && e.touches[0].clientX);
+    const clientY = (e.clientY !== undefined) ? e.clientY : (e.touches && e.touches[0] && e.touches[0].clientY);
+    return { x: clientX - rect.left, y: clientY - rect.top };
   }
 
-  function startDraw(e){
-    drawing = true;
-    currentPath = [];
-    draw(e);
-  }
-
-  function endDraw(){
-    if(drawing){
-      undoStack.push([...currentPath]);
-      redoStack.length = 0;
+  // Canvas sizing: match drawing buffer to CSS pixels to avoid offset issues
+  function resizeCanvasToDisplay() {
+    const rect = canvas.getBoundingClientRect();
+    const w = Math.max(1, Math.round(rect.width));
+    const h = Math.max(1, Math.round(rect.height));
+    if (canvas.width !== w || canvas.height !== h) {
+      // resize buffer and redraw strokes
+      canvas.width = w;
+      canvas.height = h;
+      redrawAll();
     }
-    drawing = false;
+  }
+  window.addEventListener('load', resizeCanvasToDisplay);
+  window.addEventListener('resize', resizeCanvasToDisplay);
+
+  // Drawing functions (stroke-level)
+  function beginStroke(point) {
+    currentStroke = { points: [point], color: currentColor, lineWidth, isEraser: !!isEraser };
+    drawing = true;
     ctx.beginPath();
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.lineWidth = currentStroke.lineWidth;
+    ctx.globalCompositeOperation = currentStroke.isEraser ? 'destination-out' : 'source-over';
+    ctx.moveTo(point.x, point.y);
   }
 
-  function draw(e){
-    if(!drawing) return;
-    const pos = getMousePos(e);
-    ctx.lineWidth = lineWidth;
-    ctx.lineCap = 'round';
-    ctx.strokeStyle = currentColor;
-    ctx.lineTo(pos.x, pos.y);
+  function moveStroke(point) {
+    if (!drawing || !currentStroke) return;
+    currentStroke.points.push(point);
+    ctx.lineTo(point.x, point.y);
+    ctx.strokeStyle = currentStroke.color;
+    ctx.lineWidth = currentStroke.lineWidth;
     ctx.stroke();
     ctx.beginPath();
-    ctx.moveTo(pos.x, pos.y);
-    currentPath.push({x: pos.x, y: pos.y, color: currentColor, lineWidth});
+    ctx.moveTo(point.x, point.y);
   }
 
-  function redraw(){
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    // Draw background first
-    if(backgroundImg.src){
-      ctx.drawImage(backgroundImg, 0, 0, canvas.width, canvas.height);
-    }
-    // Draw strokes
-    undoStack.forEach(path => {
-      if(path[0].image){
-        // background handled
-        return;
-      }
+  function endStroke() {
+    if (!drawing || !currentStroke) return;
+    drawing = false;
+    undoStack.push(currentStroke);
+    redoStack.length = 0;
+    currentStroke = null;
+    ctx.beginPath();
+    ctx.globalCompositeOperation = 'source-over';
+  }
+
+  // Redraw full canvas from undoStack
+  function redrawAll() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (let stroke of undoStack) {
       ctx.beginPath();
-      path.forEach(p=>{
-        ctx.strokeStyle = p.color;
-        ctx.lineWidth = p.lineWidth;
-        ctx.lineTo(p.x, p.y);
+      ctx.globalCompositeOperation = stroke.isEraser ? 'destination-out' : 'source-over';
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.lineWidth = stroke.lineWidth;
+      for (let i = 0; i < stroke.points.length; i++) {
+        const p = stroke.points[i];
+        if (i === 0) ctx.moveTo(p.x, p.y);
+        else ctx.lineTo(p.x, p.y);
+        ctx.strokeStyle = stroke.color;
         ctx.stroke();
         ctx.beginPath();
-        ctx.moveTo(p.x,p.y);
-      });
-    });
+        ctx.moveTo(p.x, p.y);
+      }
+    }
+    ctx.globalCompositeOperation = 'source-over';
   }
 
+  // Event handlers
+  // Mouse
+  canvas.addEventListener('mousedown', (e) => {
+    const pos = getPosFromEvent(e);
+    beginStroke(pos);
+  });
+  window.addEventListener('mousemove', (e) => {
+    if (!drawing) return;
+    const pos = getPosFromEvent(e);
+    moveStroke(pos);
+  });
+  window.addEventListener('mouseup', () => { if (drawing) endStroke(); });
+
+  // Touch
+  canvas.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    const pos = getPosFromEvent(e.changedTouches[0]);
+    beginStroke(pos);
+  }, { passive: false });
+
+  canvas.addEventListener('touchmove', (e) => {
+    e.preventDefault();
+    if (!drawing) return;
+    const pos = getPosFromEvent(e.changedTouches[0]);
+    moveStroke(pos);
+  }, { passive: false });
+
+  canvas.addEventListener('touchend', (e) => {
+    e.preventDefault();
+    if (drawing) endStroke();
+  }, { passive: false });
+
+  // Palette interaction
+  palette.addEventListener('click', (e) => {
+    const el = e.target.closest('.color');
+    if (!el) return;
+    isEraser = false; // selecting a color returns to pen
+    setActiveColor(el);
+    updateToolLabel();
+  });
+  // default select first color
+  setActiveColor(palette.querySelector('.color'));
+
+  // Brush size
+  sizeRange.addEventListener('input', (e) => {
+    lineWidth = Number(e.target.value);
+    sizeLabel.textContent = lineWidth;
+  });
+  sizeLabel.textContent = lineWidth;
+
+  // Tool toggle
+  function updateToolLabel() {
+    toolToggle.textContent = isEraser ? 'Tool: Eraser' : 'Tool: Pen';
+    toolToggle.classList.toggle('selected', isEraser);
+  }
+  toolToggle.addEventListener('click', () => {
+    isEraser = !isEraser;
+    updateToolLabel();
+  });
+  updateToolLabel();
+
   // Undo / Redo / Clear
-  undoBtn.addEventListener('click', ()=>{
-    if(undoStack.length){
-      redoStack.push(undoStack.pop());
-      redraw();
-    }
+  undoBtn.addEventListener('click', () => {
+    if (undoStack.length === 0) return;
+    redoStack.push(undoStack.pop());
+    redrawAll();
   });
-  redoBtn.addEventListener('click', ()=>{
-    if(redoStack.length){
-      undoStack.push(redoStack.pop());
-      redraw();
-    }
+  redoBtn.addEventListener('click', () => {
+    if (redoStack.length === 0) return;
+    undoStack.push(redoStack.pop());
+    redrawAll();
   });
-  clearBtn.addEventListener('click', ()=>{
+  clearBtn.addEventListener('click', () => {
     undoStack.length = 0;
     redoStack.length = 0;
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    if(backgroundImg.src) ctx.drawImage(backgroundImg,0,0,canvas.width,canvas.height);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
   });
 
-  // Events
-  canvas.addEventListener('mousedown', startDraw);
-  window.addEventListener('mouseup', endDraw);
-  canvas.addEventListener('mousemove', draw);
-  canvas.addEventListener('touchstart', e=>{startDraw(e.touches[0]); e.preventDefault();},{passive:false});
-  canvas.addEventListener('touchmove', e=>{draw(e.touches[0]); e.preventDefault();},{passive:false});
-  canvas.addEventListener('touchend', e=>{endDraw(); e.preventDefault();},{passive:false});
+  // Download (save)
+  downloadBtn.addEventListener('click', () => {
+    try {
+      redrawAll(); // ensure canvas up to date
+      const dataURL = canvas.toDataURL('image/png'); // may throw if canvas tainted by cross-origin images
+      const a = document.createElement('a');
+      a.href = dataURL;
+      a.download = `color-therapy-${Date.now()}.png`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    } catch (err) {
+      console.error('Save failed (canvas may be tainted):', err);
+      alert('Save failed — canvas may contain images from another domain. Use images hosted on this site or try another browser.');
+    }
+  });
 
-  // Init
-  loadImage(images[0].dataset.src);
-  resizeCanvas();
+  // Keyboard shortcuts
+  window.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'z') { e.preventDefault(); undoBtn.click(); }
+    if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.shiftKey && e.key === 'Z'))) { e.preventDefault(); redoBtn.click(); }
+  });
+
+  // Expose for debug (optional)
+  window.__ct = { undoStack, redoStack, redrawAll, getPosFromEvent };
+
+  // Ensure canvas buffer matches CSS size on load
+  resizeCanvasToDisplay();
 })();
 </script>
 {% endblock %}
