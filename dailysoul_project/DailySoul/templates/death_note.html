@@ -592,7 +592,7 @@
 </style>
 
 <div class="deathnote-container">
-  <!-- Success Messages -->
+
   {% if messages %}
     {% for message in messages %}
       <div class="{% if message.tags == 'error' %}alert-error{% else %}alert-success{% endif %}">
@@ -602,13 +602,13 @@
     {% endfor %}
   {% endif %}
 
-  <!-- Enhanced Header -->
+
   <div class="deathnote-header">
     <h1>💀 Death Note</h1>
     <p>Release negative thoughts and embrace peace. Write it down, then let it go.</p>
   </div>
 
-  <!-- Enhanced Stats -->
+
   <div class="stats-container">
     <div class="stat-card">
       <span class="stat-number">{{ notes|length }}</span>
@@ -628,7 +628,7 @@
     </div>
   </div>
 
-  <!-- Enhanced Writing Card -->
+
   <div class="deathnote-card">
     <h2 style="color: #ff6b6b; margin-bottom: 10px;">✍️ Write Your Thought</h2>
     <p style="color: var(--muted); margin: 0;">What's weighing on your mind? Give it words, then give it wings.</p>
@@ -663,7 +663,6 @@
     </form>
   </div>
 
-  <!-- Enhanced Notes List -->
   {% if notes %}
   <h2 style="color: #333; margin-bottom: 20px; font-size: 1.5rem;">
     <span>📚</span>
@@ -676,7 +675,7 @@
     <div class="note" id="note-{{ note.id }}">
       <div class="note-content">{{ note.content }}</div>
 
-      <!-- Check if content needs expand button (more than 3 lines) -->
+
       {% if note.content|length > 150 %}
       <button class="expand-btn" onclick="toggleExpand('{{ note.id }}')">
         <span>📖</span>

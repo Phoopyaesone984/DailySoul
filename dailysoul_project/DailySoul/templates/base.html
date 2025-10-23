@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
-  /* ---------------- Theme (from your original) ---------------- */
+
   :root {
     --bg1: #e8f5e9;
     --bg2: #fff3e0;
@@ -41,7 +41,7 @@
     min-height: 100vh;
   }
 
-  /* Main container for proper centering */
+
   .page-container {
     display: flex;
     flex-direction: column;
@@ -58,7 +58,7 @@
     flex: 1;
   }
 
-  /* ---------------- Enhanced Desktop Scroll Behavior ---------------- */
+
   .scroll-progress {
     position: fixed;
     top: 0;
@@ -70,7 +70,7 @@
     transition: width 0.1s ease;
   }
 
-  /* Back to top button - desktop optimized */
+
   .back-to-top {
     position: fixed;
     bottom: 40px;
@@ -107,7 +107,7 @@
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
   }
 
-  /* ---------------- Desktop Navbar (Fixed for better appearance) ---------------- */
+
   .navbar {
     width: 100%;
     max-width: var(--max-container-width);
@@ -130,7 +130,7 @@
     letter-spacing: -0.5px;
   }
 
-  /* Desktop Navigation Links */
+
   .nav-links {
     display: flex;
     align-items: center;
@@ -242,7 +242,7 @@
     text-decoration: none;
   }
 
-  /* ---------------- Scroll Animations for Desktop ---------------- */
+
   .fade-in {
     opacity: 0;
     transform: translateY(40px);
@@ -276,7 +276,7 @@
     transform: translateX(0);
   }
 
-  /* ---------------- Mobile Styles (unchanged from your working version) ---------------- */
+
   .mobile-toggle {
     display: none;
     background: transparent;
@@ -396,7 +396,7 @@
     border-radius: 8px;
   }
 
-  /* ---------------- Responsive Breakpoints ---------------- */
+
   @media (max-width: 1100px) {
     .navbar {
       padding: 18px 25px;
@@ -467,27 +467,27 @@
 </head>
 <body>
 
-  <!-- Scroll Progress Indicator -->
+
   <div class="scroll-progress" id="scrollProgress"></div>
 
-  <!-- Back to Top Button -->
+
   <button class="back-to-top" id="backToTop" aria-label="Back to top">↑</button>
 
   <div class="page-container">
-    <!-- ---------------- NAVBAR ---------------- -->
+
     <nav class="navbar" role="navigation" aria-label="Main Navigation">
       <div style="display:flex; align-items:center; gap:12px;">
         <h2 class="logo">DailySoul</h2>
       </div>
 
-      <!-- Desktop Links -->
+
       <div class="nav-links" aria-hidden="false">
         <ul>
           <li><a href="{% url 'dashboard' %}">Home</a></li>
           <li><a href="/journal/">Journal</a></li>
           <li><a href="/deathnote/">DeathNote</a></li>
 
-          <!-- Desktop Mega Menu / Mini-Games -->
+
           <li class="mega-menu-item">
             <a href="{% url 'dashboard' %}#miniGamesSection" id="miniGamesNav">
               Mini-Games <span class="arrow-down" aria-hidden="true">▼</span>
@@ -510,7 +510,7 @@
       <button class="mobile-toggle" id="mobileToggle" aria-label="Open menu" aria-expanded="false">☰</button>
     </nav>
 
-    <!-- Mobile Navigation -->
+
     <div class="mobile-nav" id="mobileNav" aria-hidden="true">
       <div class="mobile-drawer" id="mobileDrawer" role="dialog" aria-modal="true" aria-label="Mobile menu">
         <button class="close-btn" id="mobileClose" aria-label="Close menu">✕</button>
@@ -543,7 +543,7 @@
 
   <script>
   (function(){
-    /* ---------- Enhanced Desktop Scroll Behavior ---------- */
+
     const scrollProgress = document.getElementById('scrollProgress');
     const backToTop = document.getElementById('backToTop');
 
@@ -555,7 +555,7 @@
       scrollProgress.style.width = scrolled + '%';
     }
 
-    // Back to top button with better timing
+
     function updateBackToTop() {
       if (window.scrollY > 500) {
         backToTop.classList.add('visible');
@@ -564,7 +564,7 @@
       }
     }
 
-    // Smooth scroll to top
+
     function scrollToTop() {
       window.scrollTo({
         top: 0,
@@ -572,7 +572,7 @@
       });
     }
 
-    // Scroll event listener with throttling
+
     let scrollTimeout;
     window.addEventListener('scroll', function() {
       if (!scrollTimeout) {
@@ -584,10 +584,10 @@
       }
     });
 
-    // Back to top click event
+
     backToTop.addEventListener('click', scrollToTop);
 
-    // Initialize scroll effects
+
     updateScrollProgress();
     updateBackToTop();
 
@@ -611,7 +611,7 @@
     window.addEventListener('load', checkScroll);
     setTimeout(checkScroll, 100); // Initial check after load
 
-    /* ---------- Enhanced Smooth Scrolling for Desktop ---------- */
+
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
       anchor.addEventListener('click', function (e) {
         const targetId = this.getAttribute('href');
@@ -631,7 +631,7 @@
       });
     });
 
-    /* ---------- Your existing mini-games functionality (unchanged) ---------- */
+
     const miniNav = document.getElementById('miniGamesNav');
     const megaItem = miniNav ? miniNav.closest('.mega-menu-item') : null;
     const megaContent = document.getElementById('megaMenuContent');
@@ -701,7 +701,7 @@
       });
     }
 
-    /* ---------- Mobile drawer behavior (unchanged) ---------- */
+
     const mobileToggle = document.getElementById('mobileToggle');
     const mobileNav = document.getElementById('mobileNav');
     const mobileDrawer = document.getElementById('mobileDrawer');

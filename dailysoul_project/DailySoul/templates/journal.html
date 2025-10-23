@@ -83,7 +83,7 @@
     align-items: start;
   }
 
-  /* Journal form card - increased height since we removed today's section */
+
   .journal-card {
     background: var(--card-bg);
     border-radius: var(--radius);
@@ -130,7 +130,7 @@
   }
 
   .journal-form textarea {
-    min-height: 450px; /* Increased height to use the extra space */
+    min-height: 450px;
     resize: vertical;
     margin-top: 12px;
     line-height: 1.6;
@@ -179,7 +179,7 @@
     border-color: #ccc;
   }
 
-  /* Past entries sidebar */
+
   .sidebar {
     background: var(--card-bg);
     border-radius: var(--radius);
@@ -189,7 +189,7 @@
     flex-direction: column;
     gap: 12px;
     height: fit-content;
-    max-height: 700px; /* Increased height to match the taller form */
+    max-height: 700px;
     overflow: hidden;
   }
 
@@ -197,7 +197,7 @@
     display: flex;
     flex-direction: column;
     gap: 12px;
-    max-height: 620px; /* Increased to use available space */
+    max-height: 620px;
     overflow: auto;
     padding-right: 4px;
   }
@@ -247,7 +247,7 @@
   .entry-meta {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start; /* Changed to flex-start to better align items */
+    align-items: flex-start;
     gap: 8px;
     margin-bottom: 6px;
     position: relative;
@@ -258,7 +258,7 @@
     color: #333;
     font-size: 0.9rem;
     flex: 1;
-    padding-right: 80px; /* Add padding to prevent text overlap with actions */
+    padding-right: 80px;
   }
 
   .entry-time {
@@ -284,7 +284,7 @@
     overflow: hidden;
   }
 
-  /* FIXED: Better positioned action buttons */
+
   .entry-actions {
     position: absolute;
     top: 8px;
@@ -335,7 +335,7 @@
     background: rgba(255,68,68,0.1);
   }
 
-  /* Entry Detail Modal */
+
   .entry-modal {
     display: none;
     position: fixed;
@@ -576,7 +576,7 @@
 </style>
 
 <div class="journal-container">
-  <!-- Success Message -->
+
   {% if messages %}
     {% for message in messages %}
       <div class="alert-success">
@@ -601,7 +601,7 @@
   </div>
 
   <div class="journal-grid">
-    <!-- LEFT: Journal form only  -->
+
     <div>
       <div class="journal-card">
         <div class="section-head">
@@ -614,7 +614,7 @@
 
         <form method="post" class="journal-form" id="journal-form">
           {% csrf_token %}
-          <!-- Hidden field to track if we're editing an existing entry -->
+
           <input type="hidden" name="entry_id" id="entry-id-field" value="">
 
           <input name="title" id="entry-title" placeholder="Title (optional)" value="" />
@@ -633,7 +633,7 @@
 
     </div>
 
-    <!-- RIGHT: Past entries grouped by day -->
+
     <aside class="sidebar">
       <div class="section-head">
         <h3 style="margin:0; color:var(--accent);">📚 Past Entries</h3>
@@ -677,7 +677,6 @@
   </div>
 </div>
 
-<!-- Entry Detail Modal -->
 <div class="entry-modal" id="entry-modal">
   <div class="modal-content">
     <div class="modal-header">
@@ -685,12 +684,11 @@
       <button class="close-modal" id="close-modal">&times;</button>
     </div>
     <div class="modal-body" id="modal-body">
-      <!-- Content will be populated by JavaScript -->
+
     </div>
   </div>
 </div>
 
-<!-- Delete Confirmation Modal -->
 <div class="delete-modal" id="delete-modal">
   <div class="delete-modal-content">
     <div class="delete-modal-icon">🗑️</div>
