@@ -4,6 +4,13 @@ from django.contrib.auth.models import User
 
 User._meta.get_field('email')._unique = True
 
+# models.py
+from django.db import models
+from django.contrib.auth.models import User
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+
 
 class Affirmation(models.Model):
     text = models.TextField()
