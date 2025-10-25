@@ -483,8 +483,7 @@ def save_bubble_score(request):
 
 
 def get_bubble_high_scores(request):
-    """Get bubble pop high scores"""
-    # Mock data - replace with actual database query if you have a scores model
+
     high_scores = [
         {'player': 'Player1', 'score': 1500},
         {'player': 'Player2', 'score': 1200},

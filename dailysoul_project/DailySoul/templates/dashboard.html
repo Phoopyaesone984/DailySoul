@@ -192,6 +192,21 @@
     .aff-text { position:relative; z-index:1; font-style: italic; font-size:0.95rem; }
     .aff-cat { font-size:0.8rem; color:var(--muted-light); margin-top:6px; text-transform:capitalize; }
 
+    .read-aloud-btn {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      margin-top: 8px;
+      transition: background 0.2s;
+    }
+    .read-aloud-btn:hover {
+      background: var(--accent-dark);
+    }
+
 
 
     .welcome-message {
@@ -524,32 +539,80 @@
 
     })();
 
+    (function() {
+      const readBtns = document.querySelectorAll('.read-aloud-btn');
 
-  (function() {
-    const readBtns = document.querySelectorAll('.read-aloud-btn');
+      // Function to detect if text contains Burmese characters
+      function isBurmese(text) {
+        // Burmese Unicode range: U+1000 to U+109F
+        const burmeseRegex = /[\u1000-\u109F]/;
+        return burmeseRegex.test(text);
+      }
 
-    readBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        const targetId = btn.dataset.target;
-        const textEl = document.getElementById(targetId);
-        if (!textEl) return;
+      // Function to detect if text contains English characters
+      function isEnglish(text) {
+        // Basic Latin alphabet detection
+        const englishRegex = /[A-Za-z]/;
+        return englishRegex.test(text);
+      }
 
-        const utterance = new SpeechSynthesisUtterance(textEl.textContent);
-        utterance.lang = 'en-US'; // you can customize the language
-        utterance.rate = 1; // normal speed
-        utterance.pitch = 1; // normal pitch
-        utterance.volume = 1;
+      readBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const targetId = btn.dataset.target;
+          const textEl = document.getElementById(targetId);
+          if (!textEl) return;
 
-        // Stop any existing speech
-        window.speechSynthesis.cancel();
+          const text = textEl.textContent.trim();
 
-        // Speak the text
-        window.speechSynthesis.speak(utterance);
+          // Stop any existing speech
+          window.speechSynthesis.cancel();
+
+          // Create new utterance
+          const utterance = new SpeechSynthesisUtterance(text);
+
+          // Detect language and set appropriate voice settings
+          if (isBurmese(text)) {
+            // Burmese language settings
+            utterance.lang = 'my-MM'; // Burmese (Myanmar)
+            utterance.rate = 0.9;    // Slightly slower for Burmese
+            utterance.pitch = 1;
+            utterance.volume = 1;
+
+            // Try to find a Burmese voice if available
+            const voices = window.speechSynthesis.getVoices();
+            const burmeseVoice = voices.find(voice =>
+              voice.lang === 'my-MM' || voice.lang.startsWith('my-')
+            );
+
+            if (burmeseVoice) {
+              utterance.voice = burmeseVoice;
+            }
+          } else if (isEnglish(text)) {
+            // English language settings
+            utterance.lang = 'en-US';
+            utterance.rate = 1;
+            utterance.pitch = 1;
+            utterance.volume = 1;
+          } else {
+            // Default settings for other languages
+            utterance.lang = 'en-US';
+            utterance.rate = 1;
+            utterance.pitch = 1;
+            utterance.volume = 1;
+          }
+
+          // Speak the text
+          window.speechSynthesis.speak(utterance);
+        });
       });
-    });
-  })();
 
-
+      // Load voices when they become available
+      if (window.speechSynthesis.onvoiceschanged !== undefined) {
+        window.speechSynthesis.onvoiceschanged = function() {
+          // Voices are now loaded
+        };
+      }
+    })();
   </script>
 {% endblock %}
 </body>
